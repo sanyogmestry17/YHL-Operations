@@ -969,7 +969,11 @@ export const PortalProvider = ({ children }) => {
       const saved = localStorage.getItem('yhl_products');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const missing = DEFAULT_PRODUCTS.filter(dp => !parsed.some(p => p.id === dp.id));
+          if (missing.length > 0) return [...parsed, ...missing];
+          return parsed;
+        }
       }
     } catch (e) {
       console.error("Failed to load products:", e);
@@ -1021,7 +1025,12 @@ export const PortalProvider = ({ children }) => {
       const saved = localStorage.getItem('yhl_inventory');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return parsed;
+        if (parsed && typeof parsed === 'object') {
+          Object.keys(DEFAULT_INVENTORY).forEach(k => {
+            if (parsed[k] === undefined) parsed[k] = DEFAULT_INVENTORY[k];
+          });
+          return parsed;
+        }
       }
     } catch (e) {
       console.error("Failed to load inventory:", e);
@@ -1083,7 +1092,15 @@ export const PortalProvider = ({ children }) => {
   const [safetyThresholds, setSafetyThresholds] = useState(() => {
     try {
       const saved = localStorage.getItem('yhl_safety_thresholds');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          Object.keys(DEFAULT_THRESHOLDS).forEach(k => {
+            if (parsed[k] === undefined) parsed[k] = DEFAULT_THRESHOLDS[k];
+          });
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error("Failed to load safety thresholds:", e);
     }
@@ -1103,7 +1120,15 @@ export const PortalProvider = ({ children }) => {
   const [vendorsConfig, setVendorsConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('yhl_vendors_config');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          Object.keys(DEFAULT_VENDORS_CONFIG).forEach(k => {
+            if (!parsed[k]) parsed[k] = DEFAULT_VENDORS_CONFIG[k];
+          });
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error("Failed to load vendors config:", e);
     }
@@ -1115,7 +1140,11 @@ export const PortalProvider = ({ children }) => {
       const saved = localStorage.getItem('yhl_delivery_destinations');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const missing = DEFAULT_DESTINATIONS.filter(d => !parsed.includes(d));
+          if (missing.length > 0) return [...parsed, ...missing];
+          return parsed;
+        }
       }
     } catch (e) {
       console.error("Failed to load delivery destinations:", e);
@@ -1231,24 +1260,78 @@ export const PortalProvider = ({ children }) => {
         
         if (configRows) {
           const prodRow = configRows.find(r => r.key === 'products');
-          if (prodRow) setProducts(prodRow.value);
-          else await supabase.from('config_settings').insert({ key: 'products', value: products });
+          if (prodRow) {
+            const dbProds = prodRow.value || [];
+            const missing = DEFAULT_PRODUCTS.filter(dp => !dbProds.some(p => p.id === dp.id));
+            if (missing.length > 0) {
+              const updated = [...dbProds, ...missing];
+              setProducts(updated);
+              await supabase.from('config_settings').upsert({ key: 'products', value: updated });
+            } else {
+              setProducts(dbProds);
+            }
+          } else {
+            await supabase.from('config_settings').insert({ key: 'products', value: products });
+          }
 
           const compRow = configRows.find(r => r.key === 'company_config');
           if (compRow) setCompanyConfig(compRow.value);
           else await supabase.from('config_settings').insert({ key: 'company_config', value: companyConfig });
 
           const vendRow = configRows.find(r => r.key === 'vendors_config');
-          if (vendRow) setVendorsConfig(vendRow.value);
-          else await supabase.from('config_settings').insert({ key: 'vendors_config', value: vendorsConfig });
+          if (vendRow) {
+            const dbVends = vendRow.value || {};
+            let changed = false;
+            Object.keys(DEFAULT_VENDORS_CONFIG).forEach(k => {
+              if (!dbVends[k]) {
+                dbVends[k] = DEFAULT_VENDORS_CONFIG[k];
+                changed = true;
+              }
+            });
+            if (changed) {
+              setVendorsConfig(dbVends);
+              await supabase.from('config_settings').upsert({ key: 'vendors_config', value: dbVends });
+            } else {
+              setVendorsConfig(dbVends);
+            }
+          } else {
+            await supabase.from('config_settings').insert({ key: 'vendors_config', value: vendorsConfig });
+          }
 
           const threshRow = configRows.find(r => r.key === 'safety_thresholds');
-          if (threshRow) setSafetyThresholds(threshRow.value);
-          else await supabase.from('config_settings').insert({ key: 'safety_thresholds', value: safetyThresholds });
+          if (threshRow) {
+            const dbThresh = threshRow.value || {};
+            let changed = false;
+            Object.keys(DEFAULT_THRESHOLDS).forEach(k => {
+              if (dbThresh[k] === undefined) {
+                dbThresh[k] = DEFAULT_THRESHOLDS[k];
+                changed = true;
+              }
+            });
+            if (changed) {
+              setSafetyThresholds(dbThresh);
+              await supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: dbThresh });
+            } else {
+              setSafetyThresholds(dbThresh);
+            }
+          } else {
+            await supabase.from('config_settings').insert({ key: 'safety_thresholds', value: safetyThresholds });
+          }
 
           const destRow = configRows.find(r => r.key === 'delivery_destinations');
-          if (destRow) setDeliveryDestinations(destRow.value);
-          else await supabase.from('config_settings').insert({ key: 'delivery_destinations', value: deliveryDestinations });
+          if (destRow) {
+            const dbDest = destRow.value || [];
+            const missing = DEFAULT_DESTINATIONS.filter(d => !dbDest.includes(d));
+            if (missing.length > 0) {
+              const updated = [...dbDest, ...missing];
+              setDeliveryDestinations(updated);
+              await supabase.from('config_settings').upsert({ key: 'delivery_destinations', value: updated });
+            } else {
+              setDeliveryDestinations(dbDest);
+            }
+          } else {
+            await supabase.from('config_settings').insert({ key: 'delivery_destinations', value: deliveryDestinations });
+          }
         }
 
         // 2. Fetch Batches
@@ -1291,7 +1374,20 @@ export const PortalProvider = ({ children }) => {
           invRowsDb.forEach(row => {
             invObj[row.item_name] = row.quantity;
           });
+          
+          let missingInventory = [];
+          Object.keys(DEFAULT_INVENTORY).forEach(k => {
+            if (invObj[k] === undefined) {
+              invObj[k] = 0;
+              missingInventory.push({ item_name: k, quantity: 0 });
+            }
+          });
+          
           setInventory(invObj);
+          
+          if (missingInventory.length > 0) {
+            await supabase.from('inventory').upsert(missingInventory);
+          }
         }
 
         // 6. Fetch Carry Forwards
@@ -2336,11 +2432,25 @@ export const PortalProvider = ({ children }) => {
     setInvoices([]);
     setCarryForwards([]);
     setNotifications([]);
+    
+    // Reset configs and states to new defaults
+    setProducts(DEFAULT_PRODUCTS);
+    setVendorsConfig(DEFAULT_VENDORS_CONFIG);
+    setSafetyThresholds(DEFAULT_THRESHOLDS);
+    setDeliveryDestinations(DEFAULT_DESTINATIONS);
+    
     const clearedInventory = {};
-    Object.keys(inventory).forEach((key) => {
+    Object.keys(DEFAULT_INVENTORY).forEach((key) => {
       clearedInventory[key] = 0;
     });
     setInventory(clearedInventory);
+
+    // Save to local storage
+    localStorage.setItem('yhl_products', JSON.stringify(DEFAULT_PRODUCTS));
+    localStorage.setItem('yhl_vendors_config', JSON.stringify(DEFAULT_VENDORS_CONFIG));
+    localStorage.setItem('yhl_safety_thresholds', JSON.stringify(DEFAULT_THRESHOLDS));
+    localStorage.setItem('yhl_delivery_destinations', JSON.stringify(DEFAULT_DESTINATIONS));
+    localStorage.setItem('yhl_inventory', JSON.stringify(clearedInventory));
 
     if (hasSupabase) {
       try {
@@ -2350,7 +2460,13 @@ export const PortalProvider = ({ children }) => {
         await supabase.from('carry_forwards').delete().neq('id', 'placeholder');
         await supabase.from('notifications').delete().neq('id', 'placeholder');
         
-        const rows = Object.keys(inventory).map(item_name => ({
+        // Reset configs in Supabase config_settings
+        await supabase.from('config_settings').upsert({ key: 'products', value: DEFAULT_PRODUCTS });
+        await supabase.from('config_settings').upsert({ key: 'vendors_config', value: DEFAULT_VENDORS_CONFIG });
+        await supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: DEFAULT_THRESHOLDS });
+        await supabase.from('config_settings').upsert({ key: 'delivery_destinations', value: DEFAULT_DESTINATIONS });
+        
+        const rows = Object.keys(clearedInventory).map(item_name => ({
           item_name,
           quantity: 0
         }));
