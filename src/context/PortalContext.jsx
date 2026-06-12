@@ -269,6 +269,13 @@ const DEFAULT_INVENTORY = {
   'Magnesium Lotion': 210
 };
 
+// Default Authentication Users
+const DEFAULT_USERS = [
+  { id: 'u-1', email: 'tech@yourhappylife.com', password: 'admin123', name: 'Tech Admin', role: 'Super Admin' },
+  { id: 'u-2', email: 'ops@yourhappylife.com', password: 'ops123', name: 'Operations Lead', role: 'Operations' },
+  { id: 'u-3', email: 'accounts@yourhappylife.com', password: 'accts123', name: 'Accounts Manager', role: 'Accounts' }
+];
+
 // Initial Mock Data
 const MOCK_BATCHES = [
   {
@@ -551,6 +558,29 @@ export const PortalProvider = ({ children }) => {
     return saved ? saved : 'dark';
   });
 
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yhl_current_user');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load current user:", e);
+    }
+    return null;
+  });
+
+  const [users, setUsers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yhl_users');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error("Failed to load users list:", e);
+    }
+    return DEFAULT_USERS;
+  });
+
   const [role, setRole] = useState(() => {
     const saved = localStorage.getItem('yhl_role');
     return saved ? saved : 'Operations';
@@ -646,6 +676,18 @@ export const PortalProvider = ({ children }) => {
     localStorage.setItem('yhl_vendors_config', JSON.stringify(vendorsConfig));
   }, [vendorsConfig]);
 
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('yhl_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('yhl_current_user');
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    localStorage.setItem('yhl_users', JSON.stringify(users));
+  }, [users]);
+
   // --- Supabase DB Load & Synchronization ---
   const [isDbLoading, setIsDbLoading] = useState(hasSupabase);
 
@@ -674,15 +716,36 @@ export const PortalProvider = ({ children }) => {
 
         // 2. Fetch Batches
         const { data: batchesRows } = await supabase.from('batches').select('*');
-        if (batchesRows && batchesRows.length > 0) setBatches(batchesRows.map(mapDBBatch));
+        if (batchesRows && batchesRows.length > 0) {
+          setBatches(batchesRows.map(mapDBBatch));
+        } else if (batchesRows && batchesRows.length === 0) {
+          try {
+            await supabase.from('batches').insert(MOCK_BATCHES.map(mapUIBatch));
+          } catch (e) { console.warn("Failed to seed batches:", e); }
+          setBatches(MOCK_BATCHES);
+        }
 
         // 3. Fetch POs
         const { data: poRows } = await supabase.from('purchase_orders').select('*');
-        if (poRows && poRows.length > 0) setPurchaseOrders(poRows.map(mapDBPO));
+        if (poRows && poRows.length > 0) {
+          setPurchaseOrders(poRows.map(mapDBPO));
+        } else if (poRows && poRows.length === 0) {
+          try {
+            await supabase.from('purchase_orders').insert(MOCK_POS.map(mapUIPO));
+          } catch (e) { console.warn("Failed to seed POs:", e); }
+          setPurchaseOrders(MOCK_POS.map(migratePO));
+        }
 
         // 4. Fetch Invoices
         const { data: invRows } = await supabase.from('invoices').select('*');
-        if (invRows && invRows.length > 0) setInvoices(invRows.map(mapDBInvoice));
+        if (invRows && invRows.length > 0) {
+          setInvoices(invRows.map(mapDBInvoice));
+        } else if (invRows && invRows.length === 0) {
+          try {
+            await supabase.from('invoices').insert(MOCK_INVOICES.map(mapUIInvoice));
+          } catch (e) { console.warn("Failed to seed invoices:", e); }
+          setInvoices(MOCK_INVOICES);
+        }
 
         // 5. Fetch Inventory
         const { data: invRowsDb } = await supabase.from('inventory').select('*');
@@ -715,6 +778,31 @@ export const PortalProvider = ({ children }) => {
           read: row.read
         })));
 
+        // 8. Fetch Portal Users
+        try {
+          const { data: userRows } = await supabase.from('portal_users').select('*');
+          if (userRows && userRows.length > 0) {
+            setUsers(userRows.map(row => ({
+              id: row.id,
+              email: row.email,
+              password: row.password,
+              name: row.name,
+              role: row.role
+            })));
+          } else {
+            // Seed defaults into database if empty
+            await supabase.from('portal_users').insert(DEFAULT_USERS.map(u => ({
+              id: u.id,
+              email: u.email,
+              password: u.password,
+              name: u.name,
+              role: u.role
+            })));
+          }
+        } catch (e) {
+          console.warn("portal_users table fetch failed, running in fallback mode:", e);
+        }
+
       } catch (err) {
         console.error("Failed to load initial data from Supabase:", err);
       } finally {
@@ -725,6 +813,27 @@ export const PortalProvider = ({ children }) => {
   }, []);
 
   // Write changes back to Supabase
+  useEffect(() => {
+    if (!hasSupabase || isDbLoading) return;
+    const syncUsers = async () => {
+      try {
+        const rows = users.map(u => ({
+          id: u.id,
+          email: u.email,
+          password: u.password,
+          name: u.name,
+          role: u.role
+        }));
+        if (rows.length > 0) {
+          await supabase.from('portal_users').upsert(rows);
+        }
+      } catch (e) {
+        console.warn("portal_users sync failed:", e);
+      }
+    };
+    syncUsers();
+  }, [users, isDbLoading]);
+
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
     supabase.from('config_settings').upsert({ key: 'products', value: products });
@@ -1626,6 +1735,41 @@ export const PortalProvider = ({ children }) => {
     return list;
   }, [inventory, purchaseOrders, batches]);
 
+  // Authentication & User Management Helper Functions
+  const login = (email, password) => {
+    const matched = users.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    );
+    if (matched) {
+      setCurrentUser(matched);
+      // Automatically switch simulated role to the user's role
+      setRole(matched.role);
+      return { success: true };
+    }
+    return { success: false, message: 'Invalid email or password.' };
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+  };
+
+  const addUser = async (userData) => {
+    const newId = `u-${Date.now()}`;
+    const newUser = { id: newId, ...userData };
+    setUsers((prev) => [...prev, newUser]);
+  };
+
+  const deleteUser = async (userId) => {
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    if (hasSupabase) {
+      try {
+        await supabase.from('portal_users').delete().eq('id', userId);
+      } catch (e) {
+        console.warn("Failed to delete user from Supabase:", e);
+      }
+    }
+  };
+
   // Clear Database (Clean Slate)
   const clearDatabase = () => {
     setBatches([]);
@@ -1697,7 +1841,13 @@ export const PortalProvider = ({ children }) => {
         setCompanyConfig,
         vendorsConfig,
         setVendorsConfig,
-        warnings
+        warnings,
+        currentUser,
+        users,
+        login,
+        logout,
+        addUser,
+        deleteUser
       }}
     >
       {children}

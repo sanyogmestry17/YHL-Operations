@@ -357,7 +357,7 @@ export default function ConfigurationView() {
         <button 
           className="glass-btn" 
           style={{ 
-            background: activeTab === 'products' ? 'var(--color-cyan-grad)' : 'transparent', 
+            background: activeTab === 'products' ? 'var(--grad-primary)' : 'transparent', 
             color: activeTab === 'products' ? '#fff' : 'var(--text-muted)',
             borderColor: activeTab === 'products' ? 'var(--color-cyan)' : 'transparent',
             fontWeight: 600,
@@ -370,7 +370,7 @@ export default function ConfigurationView() {
         <button 
           className="glass-btn" 
           style={{ 
-            background: activeTab === 'company' ? 'var(--color-cyan-grad)' : 'transparent', 
+            background: activeTab === 'company' ? 'var(--grad-primary)' : 'transparent', 
             color: activeTab === 'company' ? '#fff' : 'var(--text-muted)',
             borderColor: activeTab === 'company' ? 'var(--color-cyan)' : 'transparent',
             fontWeight: 600,
@@ -383,7 +383,7 @@ export default function ConfigurationView() {
         <button 
           className="glass-btn" 
           style={{ 
-            background: activeTab === 'suppliers' ? 'var(--color-cyan-grad)' : 'transparent', 
+            background: activeTab === 'suppliers' ? 'var(--grad-primary)' : 'transparent', 
             color: activeTab === 'suppliers' ? '#fff' : 'var(--text-muted)',
             borderColor: activeTab === 'suppliers' ? 'var(--color-cyan)' : 'transparent',
             fontWeight: 600,

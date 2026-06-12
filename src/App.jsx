@@ -8,7 +8,9 @@ import {
   Package, 
   Sliders, 
   Download,
-  ShieldAlert
+  ShieldAlert,
+  Users,
+  LogOut
 } from 'lucide-react';
 
 // Views
@@ -20,6 +22,8 @@ import InventoryView from './views/InventoryView';
 import ExportView from './views/ExportView';
 import ConfigurationView from './views/ConfigurationView';
 import WarningsView from './views/WarningsView';
+import LoginView from './views/LoginView';
+import UserManagementView from './views/UserManagementView';
 
 function MainAppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -31,8 +35,14 @@ function MainAppLayout() {
     setRole, 
     notifications, 
     markAllNotificationsRead, 
-    clearNotifications 
+    clearNotifications,
+    currentUser,
+    logout
   } = usePortal();
+
+  if (!currentUser) {
+    return <LoginView />;
+  }
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -118,6 +128,17 @@ function MainAppLayout() {
                 <span>System Configuration</span>
               </button>
             </li>
+            {currentUser.role === 'Super Admin' && (
+              <li>
+                <button 
+                  className={`sidebar-item ${activeTab === 'users' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('users')}
+                >
+                  <Users className="sidebar-item-icon" />
+                  <span>User Accounts</span>
+                </button>
+              </li>
+            )}
           </ul>
 
           <div className="sidebar-footer">
@@ -161,35 +182,82 @@ function MainAppLayout() {
 
             <div className="user-badge" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <div className="user-avatar" style={{ background: role === 'Operations' ? 'var(--color-cyan)' : 'var(--color-emerald)', color: '#000', fontWeight: 700 }}>
-                  {role === 'Operations' ? 'OP' : 'AC'}
+                <div 
+                  className="user-avatar" 
+                  style={{ 
+                    background: role === 'Operations' ? 'var(--color-cyan)' : role === 'Accounts' ? 'var(--color-emerald)' : 'var(--color-rose)', 
+                    color: '#000', 
+                    fontWeight: 750,
+                    textTransform: 'uppercase',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  {currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'US'}
                 </div>
-                <div className="user-info">
-                  <span className="user-name">Sanyog Mestry</span>
-                  <span className="user-role" style={{ color: role === 'Operations' ? 'var(--color-cyan)' : 'var(--color-emerald)', fontWeight: 600 }}>
+                <div className="user-info" style={{ maxWidth: '140px', overflow: 'hidden' }}>
+                  <span className="user-name" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser.name}</span>
+                  <span className="user-role" style={{ color: role === 'Operations' ? 'var(--color-cyan)' : role === 'Accounts' ? 'var(--color-emerald)' : 'var(--color-rose)', fontWeight: 600 }}>
                     {role} view
                   </span>
                 </div>
               </div>
+
+              {currentUser.role === 'Super Admin' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.25rem' }}>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-dark)', fontWeight: 700, textTransform: 'uppercase' }}>Simulate View</span>
+                  <select 
+                    className="glass-input" 
+                    style={{ fontSize: '0.75rem', padding: '0.25rem', height: 'auto', background: 'var(--bg-input)' }}
+                    value={role}
+                    onChange={(e) => {
+                      setRole(e.target.value);
+                      if (e.target.value !== 'Accounts' && activeTab === 'invoices') {
+                        setActiveTab('dashboard');
+                      }
+                    }}
+                  >
+                    <option value="Super Admin">Super Admin</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Accounts">Accounts</option>
+                  </select>
+                </div>
+              ) : (
+                <button 
+                  className="glass-btn-primary" 
+                  style={{ 
+                    fontSize: '0.75rem', 
+                    padding: '0.35rem', 
+                    justifyContent: 'center', 
+                    width: '100%', 
+                    marginTop: '0.25rem',
+                    background: role === 'Operations' ? 'var(--grad-primary)' : 'var(--grad-success-real)'
+                  }} 
+                  onClick={() => {
+                    const newRole = role === 'Operations' ? 'Accounts' : 'Operations';
+                    setRole(newRole);
+                    if (newRole === 'Operations' && activeTab === 'invoices') {
+                      setActiveTab('dashboard');
+                    }
+                  }}
+                >
+                  Switch to {role === 'Operations' ? 'Accounts' : 'Operations'}
+                </button>
+              )}
+
+              {/* Logout Button */}
               <button 
-                className="glass-btn-primary" 
+                className="glass-btn-danger" 
                 style={{ 
                   fontSize: '0.75rem', 
                   padding: '0.35rem', 
                   justifyContent: 'center', 
                   width: '100%', 
                   marginTop: '0.25rem',
-                  background: role === 'Operations' ? 'var(--grad-primary)' : 'var(--grad-success-real)'
+                  gap: '0.35rem'
                 }} 
-                onClick={() => {
-                  const newRole = role === 'Operations' ? 'Accounts' : 'Operations';
-                  setRole(newRole);
-                  if (newRole === 'Operations' && activeTab === 'invoices') {
-                    setActiveTab('dashboard'); // fallback
-                  }
-                }}
+                onClick={logout}
               >
-                Switch to {role === 'Operations' ? 'Accounts' : 'Operations'}
+                <LogOut size={12} /> Log Out
               </button>
             </div>
           </div>
@@ -206,6 +274,7 @@ function MainAppLayout() {
         {activeTab === 'export' && <ExportView />}
         {activeTab === 'configuration' && <ConfigurationView />}
         {activeTab === 'warnings' && <WarningsView setActiveTab={setActiveTab} />}
+        {activeTab === 'users' && currentUser.role === 'Super Admin' && <UserManagementView />}
       </main>
 
       {/* Notifications Drawer Slider */}
