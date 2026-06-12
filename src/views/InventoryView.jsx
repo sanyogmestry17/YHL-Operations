@@ -45,7 +45,13 @@ export default function InventoryView() {
   };
 
   // Divide inventory items
-  const rawMaterialsKeys = ['Jar & Lid', 'Canister', 'Bottle & Pump'];
+  const rawMaterialsKeys = [
+    'Jar & Lid', 'Canister', 'Bottle & Pump',
+    'Beak pump', 'Hope bottle', '100 gm Clear Glass Jar with matte white cap',
+    'Collagen Canisters unflavoured collagen', 'Collagen Canisters Reglow (Passion Fruit)',
+    'Canister for Multi For Him', 'Canister for Multi For Her', 'Canister for Triphase Release IronPulse',
+    'SINGLE COLOR PRINTED BOPP TAPES', 'Courier Bags', 'Label for Mag 5Xup'
+  ];
   const finishedGoodsKeys = Object.keys(inventory).filter(k => !rawMaterialsKeys.includes(k));
 
   // Generate automated ledger transactions from invoices

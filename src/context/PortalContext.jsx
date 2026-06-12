@@ -123,9 +123,9 @@ const DEFAULT_VENDORS_CONFIG = {
   'Indian Harness': {
     name: 'Indian Harness',
     address: '88, Industrial Area, Sector 3, Vasai East, Palghar, Maharashtra - 401208',
-    gstin: '27AAFIH8392K1Z8',
-    stateName: 'Maharashtra',
-    stateCode: '27'
+    gstin: '07AAIFI4164M1ZW',
+    stateName: 'Delhi',
+    stateCode: '07'
   },
   'KPL': {
     name: 'KPL Packaging Limited',
@@ -154,6 +154,55 @@ const DEFAULT_VENDORS_CONFIG = {
     gstin: '23AAPFB8482L1ZV',
     stateName: 'Madhya Pradesh',
     stateCode: '23'
+  },
+  'M/s Quantum International Private Limited': {
+    name: 'M/s Quantum International Private Limited',
+    address: 'Plot No. 45, Sector 5, IMT Manesar, Gurugram, Haryana - 122050',
+    gstin: '09AAACQ0270B1ZY',
+    stateName: 'Uttar Pradesh',
+    stateCode: '09'
+  },
+  'Kamal Packaging Pvt Ltd': {
+    name: 'Kamal Packaging Pvt Ltd',
+    address: 'Plot No 22, GIDC Industrial Estate, Vapi, Gujarat - 396195',
+    gstin: '27AABCK2531J1ZD',
+    stateName: 'Maharashtra',
+    stateCode: '27'
+  },
+  '3s Fitness Technologies Private Limited': {
+    name: '3s Fitness Technologies Private Limited',
+    address: 'Survey No. 12, Industrial Area, Phase 1, Jaipur, Rajasthan - 302001',
+    gstin: '08AAACS9633K1ZV',
+    stateName: 'Rajasthan',
+    stateCode: '08'
+  },
+  'Kaushalya Enterprises': {
+    name: 'Kaushalya Enterprises',
+    address: '102, Shivam Industrial Estate, Thane West, Maharashtra - 400604',
+    gstin: '27BAWPJ5265R1ZJ',
+    stateName: 'Maharashtra',
+    stateCode: '27'
+  },
+  'Dhwani Polyprints Private Limited': {
+    name: 'Dhwani Polyprints Private Limited',
+    address: 'Survey No. 231, National Highway 8, Vapi, Gujarat - 396191',
+    gstin: '24AAACD3775C1Z1',
+    stateName: 'Gujarat',
+    stateCode: '24'
+  },
+  'Amantra Packaging': {
+    name: 'Amantra Packaging',
+    address: 'Sector 37, Pace City II, Gurugram, Haryana - 122001',
+    gstin: '06DWXPA6282L1ZT',
+    stateName: 'Haryana',
+    stateCode: '06'
+  },
+  'Ancient Nutra Private Limited': {
+    name: 'Ancient Nutra Private Limited',
+    address: 'Plot 404, GIDC, Sachin, Surat, Gujarat - 394230',
+    gstin: '24ABCCA1142R1ZD',
+    stateName: 'Gujarat',
+    stateCode: '24'
   }
 };
 
@@ -166,9 +215,9 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Capsule',
     lifecycle: [
-      { id: 'step-1-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 100.00 },
-      { id: 'step-1-2', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 140.00 },
-      { id: 'step-1-3', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 360.00 }
+      { id: 'step-1-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 24.49 },
+      { id: 'step-1-2', itemType: 'Canister', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-1-3', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 271.00 }
     ]
   },
   {
@@ -178,9 +227,9 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Capsule',
     lifecycle: [
-      { id: 'step-2-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 100.00 },
-      { id: 'step-2-2', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 140.00 },
-      { id: 'step-2-3', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 380.00 }
+      { id: 'step-2-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 24.49 },
+      { id: 'step-2-2', itemType: 'Canister', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-2-3', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 233.33 }
     ]
   },
   {
@@ -190,9 +239,8 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Capsule',
     lifecycle: [
-      { id: 'step-3-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 110.00 },
-      { id: 'step-3-2', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 150.00 },
-      { id: 'step-3-3', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 420.00 }
+      { id: 'step-3-1', itemType: 'Label for Mag 5Xup', vendor: 'Amantra Packaging', defaultUnitPrice: 7.50 },
+      { id: 'step-3-2', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 211.00 }
     ]
   },
   {
@@ -202,9 +250,9 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Capsule',
     lifecycle: [
-      { id: 'step-4-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 100.00 },
-      { id: 'step-4-2', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 140.00 },
-      { id: 'step-4-3', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 370.00 }
+      { id: 'step-4-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 24.49 },
+      { id: 'step-4-2', itemType: 'Canister', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-4-3', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 271.00 }
     ]
   },
   {
@@ -214,9 +262,9 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Capsule',
     lifecycle: [
-      { id: 'step-5-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 100.00 },
-      { id: 'step-5-2', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 140.00 },
-      { id: 'step-5-3', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 390.00 }
+      { id: 'step-5-1', itemType: 'Jar & Lid', vendor: 'Indian Harness', defaultUnitPrice: 24.49 },
+      { id: 'step-5-2', itemType: 'Canister', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-5-3', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 250.00 }
     ]
   },
   {
@@ -226,8 +274,8 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Collagen',
     lifecycle: [
-      { id: 'step-6-1', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 160.00 },
-      { id: 'step-6-2', itemType: 'Finished Goods', vendor: '3S', defaultUnitPrice: 520.00 }
+      { id: 'step-6-1', itemType: 'Collagen Canisters unflavoured collagen', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-6-2', itemType: 'Finished Goods', vendor: '3s Fitness Technologies Private Limited', defaultUnitPrice: 357.18 }
     ]
   },
   {
@@ -237,8 +285,8 @@ const DEFAULT_PRODUCTS = [
     hsn: '21069099',
     category: 'Collagen',
     lifecycle: [
-      { id: 'step-7-1', itemType: 'Canister', vendor: 'KPL', defaultUnitPrice: 160.00 },
-      { id: 'step-7-2', itemType: 'Finished Goods', vendor: '3S', defaultUnitPrice: 540.00 }
+      { id: 'step-7-1', itemType: 'Collagen Canisters Reglow (Passion Fruit)', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 21.42 },
+      { id: 'step-7-2', itemType: 'Finished Goods', vendor: '3s Fitness Technologies Private Limited', defaultUnitPrice: 396.24 }
     ]
   },
   {
@@ -248,25 +296,74 @@ const DEFAULT_PRODUCTS = [
     hsn: '33049990',
     category: 'Lotion',
     lifecycle: [
-      { id: 'step-8-1', itemType: 'Bottle & Pump', vendor: 'Indian Harness', defaultUnitPrice: 120.00 },
-      { id: 'step-8-2', itemType: 'Finished Goods', vendor: 'Bliss Wellness', defaultUnitPrice: 340.00 }
+      { id: 'step-8-1', itemType: 'Beak pump', vendor: 'Indian Harness', defaultUnitPrice: 10.50 },
+      { id: 'step-8-2', itemType: 'Hope bottle', vendor: 'Indian Harness', defaultUnitPrice: 11.00 },
+      { id: 'step-8-3', itemType: 'Finished Goods', vendor: 'M/s Quantum International Private Limited', defaultUnitPrice: 93.22 }
+    ]
+  },
+  {
+    id: 'prod-9',
+    name: 'Multi For Him',
+    sku: 'CPMAG1', // wait, let's keep SKU CPMULMIM1
+    sku: 'CPMULMIM1',
+    hsn: '21069099',
+    category: 'Capsule',
+    lifecycle: [
+      { id: 'step-9-1', itemType: 'Canister for Multi For Him', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 18.61 },
+      { id: 'step-9-2', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 310.00 }
+    ]
+  },
+  {
+    id: 'prod-10',
+    name: 'Multi For Her',
+    sku: 'CPMULHER1',
+    hsn: '21069099',
+    category: 'Capsule',
+    lifecycle: [
+      { id: 'step-10-1', itemType: 'Canister for Multi For Her', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 18.61 },
+      { id: 'step-10-2', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 320.00 }
+    ]
+  },
+  {
+    id: 'prod-11',
+    name: 'IronPulse',
+    sku: 'CPIRON1',
+    hsn: '21069099',
+    category: 'Capsule',
+    lifecycle: [
+      { id: 'step-11-1', itemType: 'Canister for Triphase Release IronPulse', vendor: 'Kamal Packaging Pvt Ltd', defaultUnitPrice: 18.61 },
+      { id: 'step-11-2', itemType: 'Finished Goods', vendor: 'Bliss Life Sciences', defaultUnitPrice: 171.00 }
     ]
   }
 ];
 
 // Initial Stock
 const DEFAULT_INVENTORY = {
-  'Jar & Lid': 1250,
-  'Canister': 2400,
-  'Bottle & Pump': 350,
-  'Omega-3': 400,
-  'Pure Skin': 150,
-  'Mag 5x Pro': 280,
-  'Core Detox': 100,
-  'Hair Revive': 80,
-  'Collagen Naked': 300,
-  'Collagen Reglow': 120,
-  'Magnesium Lotion': 210
+  'Jar & Lid': 0,
+  'Canister': 0,
+  'Bottle & Pump': 0,
+  'Beak pump': 0,
+  'Hope bottle': 0,
+  '100 gm Clear Glass Jar with matte white cap': 0,
+  'Collagen Canisters unflavoured collagen': 0,
+  'Collagen Canisters Reglow (Passion Fruit)': 0,
+  'Canister for Multi For Him': 0,
+  'Canister for Multi For Her': 0,
+  'Canister for Triphase Release IronPulse': 0,
+  'SINGLE COLOR PRINTED BOPP TAPES': 0,
+  'Courier Bags': 0,
+  'Label for Mag 5Xup': 0,
+  'Omega-3': 0,
+  'Pure Skin': 0,
+  'Mag 5x Pro': 0,
+  'Core Detox': 0,
+  'Hair Revive': 0,
+  'Collagen Naked': 0,
+  'Collagen Reglow': 0,
+  'Magnesium Lotion': 0,
+  'Multi For Him': 0,
+  'Multi For Her': 0,
+  'IronPulse': 0
 };
 
 // Default Authentication Users
@@ -281,6 +378,17 @@ const DEFAULT_THRESHOLDS = {
   'Jar & Lid': 500,
   'Canister': 500,
   'Bottle & Pump': 500,
+  'Beak pump': 500,
+  'Hope bottle': 500,
+  '100 gm Clear Glass Jar with matte white cap': 500,
+  'Collagen Canisters unflavoured collagen': 500,
+  'Collagen Canisters Reglow (Passion Fruit)': 500,
+  'Canister for Multi For Him': 500,
+  'Canister for Multi For Her': 500,
+  'Canister for Triphase Release IronPulse': 500,
+  'SINGLE COLOR PRINTED BOPP TAPES': 100,
+  'Courier Bags': 500,
+  'Label for Mag 5Xup': 500,
   'Omega-3': 150,
   'Pure Skin': 150,
   'Mag 5x Pro': 150,
@@ -288,179 +396,533 @@ const DEFAULT_THRESHOLDS = {
   'Hair Revive': 150,
   'Collagen Naked': 150,
   'Collagen Reglow': 150,
-  'Magnesium Lotion': 150
+  'Magnesium Lotion': 150,
+  'Multi For Him': 150,
+  'Multi For Her': 150,
+  'IronPulse': 150
 };
 
 // Initial Mock Data
-const MOCK_BATCHES = [
-  {
-    id: 'B-101',
-    name: 'Batch #101 - Omega-3 Q2-Launch',
-    productId: 'prod-1',
-    targetQuantity: 1000,
-    status: 'In Production',
-    startDate: '2026-05-10',
-    endDate: '2026-06-05',
-    poIds: ['PO-201', 'PO-202', 'PO-203'],
-    productsList: [{ productId: 'prod-1', targetQuantity: 1000 }]
-  },
-  {
-    id: 'B-102',
-    name: 'Batch #102 - Reglow Glow Up',
-    productId: 'prod-7',
-    targetQuantity: 500,
-    status: 'Completed',
-    startDate: '2026-04-15',
-    endDate: '2026-05-12',
-    poIds: ['PO-204', 'PO-205'],
-    productsList: [{ productId: 'prod-7', targetQuantity: 500 }]
-  }
-];
+const MOCK_BATCHES = [];
 
 const MOCK_POS = [
   {
-    id: 'PO-201',
-    batchId: 'B-101',
-    productId: 'prod-1',
-    poNumber: 'PO-YHL-001A',
+    id: 'PO-26-27-YHL01',
+    batchId: null,
+    productId: 'prod-8',
+    poNumber: 'PO/26-27/YHL01',
     vendor: 'Indian Harness',
-    itemType: 'Jar & Lid',
-    orderedQuantity: 1000,
-    balanceQuantity: 0,
-    unitPrice: 100.00,
-    totalAmount: 100000,
-    startDate: '2026-05-10',
-    endDate: '2026-05-18',
-    status: 'Fully Served',
-    invoiceIds: ['INV-301']
+    itemType: 'Beak pump, Hope bottle',
+    orderedQuantity: 4000,
+    balanceQuantity: 4000,
+    unitPrice: 10.75,
+    totalAmount: 43000,
+    startDate: '2026-04-02',
+    endDate: '2026-05-02',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL01',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL01-item-1',
+        productId: 'prod-8',
+        itemType: 'Beak pump',
+        orderedQuantity: 2000,
+        balanceQuantity: 2000,
+        unitPrice: 10.50,
+        totalAmount: 21000
+      },
+      {
+        id: 'PO-26-27-YHL01-item-2',
+        productId: 'prod-8',
+        itemType: 'Hope bottle',
+        orderedQuantity: 2000,
+        balanceQuantity: 2000,
+        unitPrice: 11.00,
+        totalAmount: 22000
+      }
+    ]
   },
   {
-    id: 'PO-202',
-    batchId: 'B-101',
-    productId: 'prod-1',
-    poNumber: 'PO-YHL-001B',
-    vendor: 'KPL',
-    itemType: 'Canister',
-    orderedQuantity: 1000,
-    balanceQuantity: 200,
-    unitPrice: 140.00,
-    totalAmount: 140000,
-    startDate: '2026-05-10',
-    endDate: '2026-05-20',
-    status: 'Partially Served',
-    invoiceIds: ['INV-302']
-  },
-  {
-    id: 'PO-203',
-    batchId: 'B-101',
-    productId: 'prod-1',
-    poNumber: 'PO-YHL-001C',
-    vendor: 'Bliss Wellness',
-    itemType: 'Finished Goods',
+    id: 'PO-26-27-YHL02',
+    batchId: null,
+    productId: 'prod-8',
+    poNumber: 'PO/26-27/YHL02',
+    vendor: 'M/s Quantum International Private Limited',
+    itemType: 'LOMAGSL1',
     orderedQuantity: 1000,
     balanceQuantity: 1000,
-    unitPrice: 360.00,
-    totalAmount: 360000,
-    startDate: '2026-05-12',
-    endDate: '2026-06-05',
+    unitPrice: 93.22,
+    totalAmount: 93220,
+    startDate: '2026-04-09',
+    endDate: '2026-05-09',
     status: 'Sent',
-    invoiceIds: []
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL02',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL02-item-1',
+        productId: 'prod-8',
+        itemType: 'LOMAGSL1',
+        orderedQuantity: 1000,
+        balanceQuantity: 1000,
+        unitPrice: 93.22,
+        totalAmount: 93220
+      }
+    ]
   },
   {
-    id: 'PO-204',
-    batchId: 'B-102',
-    productId: 'prod-7',
-    poNumber: 'PO-YHL-002A',
-    vendor: 'KPL',
-    itemType: 'Canister',
-    orderedQuantity: 500,
-    balanceQuantity: 0,
-    unitPrice: 160.00,
-    totalAmount: 80000,
-    startDate: '2026-04-15',
-    endDate: '2026-04-22',
-    status: 'Fully Served',
-    invoiceIds: ['INV-303']
+    id: 'PO-26-27-YHL03',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL03',
+    vendor: 'Indian Harness',
+    itemType: '100 gm Clear Glass Jar with matte white cap',
+    orderedQuantity: 30000,
+    balanceQuantity: 30000,
+    unitPrice: 24.49,
+    totalAmount: 734700,
+    startDate: '2026-04-09',
+    endDate: '2026-05-09',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL03',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL03-item-1',
+        productId: null,
+        itemType: '100 gm Clear Glass Jar with matte white cap',
+        orderedQuantity: 30000,
+        balanceQuantity: 30000,
+        unitPrice: 24.49,
+        totalAmount: 734700
+      }
+    ]
   },
   {
-    id: 'PO-205',
-    batchId: 'B-102',
-    productId: 'prod-7',
-    poNumber: 'PO-YHL-002B',
-    vendor: '3S',
+    id: 'PO-26-27-YHL04',
+    batchId: null,
+    productId: 'prod-1',
+    poNumber: 'PO/26-27/YHL04',
+    vendor: 'Bliss Life Sciences',
     itemType: 'Finished Goods',
-    orderedQuantity: 500,
-    balanceQuantity: 0,
-    unitPrice: 540.00,
-    totalAmount: 270000,
-    startDate: '2026-04-16',
-    endDate: '2026-05-12',
-    status: 'Fully Served',
-    invoiceIds: ['INV-304']
+    orderedQuantity: 10000,
+    balanceQuantity: 10000,
+    unitPrice: 271.00,
+    totalAmount: 2710000,
+    startDate: '2026-04-22',
+    endDate: '2026-05-22',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL04',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL04-item-1',
+        productId: 'prod-1',
+        itemType: 'Finished Goods',
+        orderedQuantity: 10000,
+        balanceQuantity: 10000,
+        unitPrice: 271.00,
+        totalAmount: 2710000
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL05',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL05',
+    vendor: 'Kamal Packaging Pvt Ltd',
+    itemType: 'Collagen Canisters unflavoured collagen, Collagen Canisters Reglow (Passion Fruit)',
+    orderedQuantity: 3200,
+    balanceQuantity: 3200,
+    unitPrice: 21.42,
+    totalAmount: 68544,
+    startDate: '2026-04-23',
+    endDate: '2026-05-23',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL05',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL05-item-1',
+        productId: 'prod-6',
+        itemType: 'Collagen Canisters unflavoured collagen',
+        orderedQuantity: 1600,
+        balanceQuantity: 1600,
+        unitPrice: 21.42,
+        totalAmount: 34272
+      },
+      {
+        id: 'PO-26-27-YHL05-item-2',
+        productId: 'prod-7',
+        itemType: 'Collagen Canisters Reglow (Passion Fruit)',
+        orderedQuantity: 1600,
+        balanceQuantity: 1600,
+        unitPrice: 21.42,
+        totalAmount: 34272
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL06',
+    batchId: null,
+    productId: 'prod-3',
+    poNumber: 'PO/26-27/YHL06',
+    vendor: 'Bliss Life Sciences',
+    itemType: 'Finished Goods',
+    orderedQuantity: 5000,
+    balanceQuantity: 5000,
+    unitPrice: 211.00,
+    totalAmount: 1055000,
+    startDate: '2026-04-30',
+    endDate: '2026-05-30',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL06',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL06-item-1',
+        productId: 'prod-3',
+        itemType: 'Finished Goods',
+        orderedQuantity: 5000,
+        balanceQuantity: 5000,
+        unitPrice: 211.00,
+        totalAmount: 1055000
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL07',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL07',
+    vendor: '3s Fitness Technologies Private Limited',
+    itemType: 'POCOUF01, POCORG01',
+    orderedQuantity: 20000,
+    balanceQuantity: 20000,
+    unitPrice: 376.71,
+    totalAmount: 7534200,
+    startDate: '2026-04-30',
+    endDate: '2026-05-30',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL07',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL07-item-1',
+        productId: 'prod-6',
+        itemType: 'POCOUF01',
+        orderedQuantity: 10000,
+        balanceQuantity: 10000,
+        unitPrice: 357.18,
+        totalAmount: 3571800
+      },
+      {
+        id: 'PO-26-27-YHL07-item-2',
+        productId: 'prod-7',
+        itemType: 'POCORG01',
+        orderedQuantity: 10000,
+        balanceQuantity: 10000,
+        unitPrice: 396.24,
+        totalAmount: 3962400
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL08',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL08',
+    vendor: 'Kaushalya Enterprises',
+    itemType: 'SINGLE COLOR PRINTED BOPP TAPES',
+    orderedQuantity: 96,
+    balanceQuantity: 96,
+    unitPrice: 112.00,
+    totalAmount: 10752,
+    startDate: '2026-05-06',
+    endDate: '2026-06-06',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL08',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL08-item-1',
+        productId: null,
+        itemType: 'SINGLE COLOR PRINTED BOPP TAPES',
+        orderedQuantity: 96,
+        balanceQuantity: 96,
+        unitPrice: 112.00,
+        totalAmount: 10752
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL09',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL09',
+    vendor: 'Kaushalya Enterprises',
+    itemType: 'SINGLE COLOR PRINTED BOPP TAPES',
+    orderedQuantity: 144,
+    balanceQuantity: 144,
+    unitPrice: 112.00,
+    totalAmount: 16128,
+    startDate: '2026-05-06',
+    endDate: '2026-06-06',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL09',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL09-item-1',
+        productId: null,
+        itemType: 'SINGLE COLOR PRINTED BOPP TAPES',
+        orderedQuantity: 144,
+        balanceQuantity: 144,
+        unitPrice: 112.00,
+        totalAmount: 16128
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL10',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL010',
+    vendor: 'Bliss Life Sciences',
+    itemType: 'Finished Goods',
+    orderedQuantity: 7500,
+    balanceQuantity: 7500,
+    unitPrice: 267.00,
+    totalAmount: 2002500,
+    startDate: '2026-05-06',
+    endDate: '2026-06-06',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL010',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL10-item-1',
+        productId: 'prod-9',
+        itemType: 'Finished Goods',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 310.00,
+        totalAmount: 775000
+      },
+      {
+        id: 'PO-26-27-YHL10-item-2',
+        productId: 'prod-10',
+        itemType: 'Finished Goods',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 320.00,
+        totalAmount: 800000
+      },
+      {
+        id: 'PO-26-27-YHL10-item-3',
+        productId: 'prod-11',
+        itemType: 'Finished Goods',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 171.00,
+        totalAmount: 427500
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL11',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL011',
+    vendor: 'Dhwani Polyprints Private Limited',
+    itemType: 'Courier Bags',
+    orderedQuantity: 10000,
+    balanceQuantity: 10000,
+    unitPrice: 5.00,
+    totalAmount: 50000,
+    startDate: '2026-05-17',
+    endDate: '2026-06-17',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL011',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL11-item-1',
+        productId: null,
+        itemType: 'Courier Bags',
+        orderedQuantity: 10000,
+        balanceQuantity: 10000,
+        unitPrice: 5.00,
+        totalAmount: 50000
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL12',
+    batchId: null,
+    productId: 'prod-3',
+    poNumber: 'PO/26-27/YHL012',
+    vendor: 'Amantra Packaging',
+    itemType: 'Label for Mag 5Xup',
+    orderedQuantity: 1500,
+    balanceQuantity: 1500,
+    unitPrice: 7.50,
+    totalAmount: 11250,
+    startDate: '2026-05-19',
+    endDate: '2026-06-19',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL012',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL12-item-1',
+        productId: 'prod-3',
+        itemType: 'Label for Mag 5Xup',
+        orderedQuantity: 1500,
+        balanceQuantity: 1500,
+        unitPrice: 7.50,
+        totalAmount: 11250
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL13',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL013',
+    vendor: 'Bliss Life Sciences',
+    itemType: 'Finished Goods',
+    orderedQuantity: 22000,
+    balanceQuantity: 22000,
+    unitPrice: 265.55,
+    totalAmount: 5842000,
+    startDate: '2026-05-22',
+    endDate: '2026-06-22',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL013',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL13-item-1',
+        productId: 'prod-3',
+        itemType: 'Finished Goods',
+        orderedQuantity: 7000,
+        balanceQuantity: 7000,
+        unitPrice: 211.00,
+        totalAmount: 1477000
+      },
+      {
+        id: 'PO-26-27-YHL13-item-2',
+        productId: 'prod-2',
+        itemType: 'Finished Goods',
+        orderedQuantity: 6000,
+        balanceQuantity: 6000,
+        unitPrice: 233.33,
+        totalAmount: 1400000
+      },
+      {
+        id: 'PO-26-27-YHL13-item-3',
+        productId: 'prod-5',
+        itemType: 'Finished Goods',
+        orderedQuantity: 5000,
+        balanceQuantity: 5000,
+        unitPrice: 250.00,
+        totalAmount: 1250000
+      },
+      {
+        id: 'PO-26-27-YHL13-item-4',
+        productId: 'prod-1',
+        itemType: 'Finished Goods',
+        orderedQuantity: 4000,
+        balanceQuantity: 4000,
+        unitPrice: 429.00,
+        totalAmount: 1716000
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL14',
+    batchId: null,
+    productId: null,
+    poNumber: 'PO/26-27/YHL014',
+    vendor: 'Kamal Packaging Pvt Ltd',
+    itemType: 'Canister for Multi For Him, Canister for Multi For Her, Canister for Triphase Release IronPulse',
+    orderedQuantity: 7500,
+    balanceQuantity: 7500,
+    unitPrice: 18.61,
+    totalAmount: 139575,
+    startDate: '2026-05-30',
+    endDate: '2026-06-30',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL014',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL14-item-1',
+        productId: 'prod-9',
+        itemType: 'Canister for Multi For Him',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 18.61,
+        totalAmount: 46525
+      },
+      {
+        id: 'PO-26-27-YHL14-item-2',
+        productId: 'prod-10',
+        itemType: 'Canister for Multi For Her',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 18.61,
+        totalAmount: 46525
+      },
+      {
+        id: 'PO-26-27-YHL14-item-3',
+        productId: 'prod-11',
+        itemType: 'Canister for Triphase Release IronPulse',
+        orderedQuantity: 2500,
+        balanceQuantity: 2500,
+        unitPrice: 18.61,
+        totalAmount: 46525
+      }
+    ]
+  },
+  {
+    id: 'PO-26-27-YHL15',
+    batchId: null,
+    productId: 'prod-1',
+    poNumber: 'PO/26-27/YHL015',
+    vendor: 'Ancient Nutra Private Limited',
+    itemType: 'Finished Goods',
+    orderedQuantity: 10000,
+    balanceQuantity: 10000,
+    unitPrice: 364.49,
+    totalAmount: 3644900,
+    startDate: '2026-06-05',
+    endDate: '2026-07-05',
+    status: 'Sent',
+    invoiceIds: [],
+    notes: 'Imported PO/26-27/YHL015',
+    itemsList: [
+      {
+        id: 'PO-26-27-YHL15-item-1',
+        productId: 'prod-1',
+        itemType: 'Finished Goods',
+        orderedQuantity: 10000,
+        balanceQuantity: 10000,
+        unitPrice: 364.49,
+        totalAmount: 3644900
+      }
+    ]
   }
 ];
 
-const MOCK_INVOICES = [
-  {
-    id: 'INV-301',
-    poId: 'PO-201',
-    batchId: 'B-101',
-    invoiceNumber: 'INV-IH-9921',
-    invoiceDate: '2026-05-17',
-    quantityDelivered: 1000,
-    unitPrice: 100.00,
-    invoiceAmount: 100000,
-    notes: 'Delivered in full, matching batch requirements.'
-  },
-  {
-    id: 'INV-302',
-    poId: 'PO-202',
-    batchId: 'B-101',
-    invoiceNumber: 'INV-KPL-8812',
-    invoiceDate: '2026-05-19',
-    quantityDelivered: 800,
-    unitPrice: 140.00,
-    invoiceAmount: 112000,
-    notes: 'Shortage of raw material. 200 units delayed.'
-  },
-  {
-    id: 'INV-303',
-    poId: 'PO-204',
-    batchId: 'B-102',
-    invoiceNumber: 'INV-KPL-8700',
-    invoiceDate: '2026-04-22',
-    quantityDelivered: 500,
-    unitPrice: 160.00,
-    invoiceAmount: 80000,
-    notes: 'Delivered in full.'
-  },
-  {
-    id: 'INV-304',
-    poId: 'PO-205',
-    batchId: 'B-102',
-    invoiceNumber: 'INV-3S-4401',
-    invoiceDate: '2026-05-12',
-    quantityDelivered: 500,
-    unitPrice: 540.00,
-    invoiceAmount: 270000,
-    notes: 'Final products delivered directly to inventory.'
-  }
-];
+const MOCK_INVOICES = [];
 
 // Carry Forward Pool
 // Struct: array of objects: { id, productId, productName, vendor, itemType, quantity, sourcePOId, sourcePONumber }
-const INITIAL_CARRY_FORWARD = [
-  {
-    id: 'cf-initial-1',
-    productId: 'prod-6',
-    productName: 'Collagen Naked',
-    vendor: 'KPL',
-    itemType: 'Canister',
-    quantity: 200,
-    sourcePOId: 'PO-202',
-    sourcePONumber: 'PO-YHL-001B'
-  }
-];
+const INITIAL_CARRY_FORWARD = [];
 
 export const migratePO = (po) => {
   if (!po.itemsList) {
@@ -1705,7 +2167,13 @@ export const PortalProvider = ({ children }) => {
     };
 
     // 1. Low Stock Warnings
-    const rawMaterialsKeys = ['Jar & Lid', 'Canister', 'Bottle & Pump'];
+    const rawMaterialsKeys = [
+      'Jar & Lid', 'Canister', 'Bottle & Pump',
+      'Beak pump', 'Hope bottle', '100 gm Clear Glass Jar with matte white cap',
+      'Collagen Canisters unflavoured collagen', 'Collagen Canisters Reglow (Passion Fruit)',
+      'Canister for Multi For Him', 'Canister for Multi For Her', 'Canister for Triphase Release IronPulse',
+      'SINGLE COLOR PRINTED BOPP TAPES', 'Courier Bags', 'Label for Mag 5Xup'
+    ];
     Object.entries(inventory).forEach(([item, qty]) => {
       const isRaw = rawMaterialsKeys.includes(item);
       const threshold = safetyThresholds[item] !== undefined ? safetyThresholds[item] : (isRaw ? 500 : 150);
