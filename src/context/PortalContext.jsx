@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase, hasSupabase } from '../lib/supabaseClient';
 
 // Database Mappers for Supabase integration
@@ -1130,6 +1130,29 @@ export const PortalProvider = ({ children }) => {
     );
   };
 
+  const deductRawMaterialsForBatch = (batch) => {
+    setInventory((prev) => {
+      const updated = { ...prev };
+      const productsList = batch.productsList || [
+        { productId: batch.productId, targetQuantity: batch.targetQuantity }
+      ];
+
+      productsList.forEach((prodItem) => {
+        const product = products.find((p) => p.id === prodItem.productId);
+        if (!product) return;
+
+        product.lifecycle.forEach((step) => {
+          if (step.itemType !== 'Finished Goods') {
+            const itemKey = step.itemType;
+            const quantityToDeduct = Number(prodItem.targetQuantity);
+            updated[itemKey] = Math.max(0, (updated[itemKey] || 0) - quantityToDeduct);
+          }
+        });
+      });
+      return updated;
+    });
+  };
+
   const dispatchPO = (poId) => {
     setPurchaseOrders((prev) =>
       prev.map((po) => {
@@ -1150,6 +1173,7 @@ export const PortalProvider = ({ children }) => {
         setBatches(prevBatches =>
           prevBatches.map(b => {
             if (b.id === po.batchId && b.status === 'Draft') {
+              deductRawMaterialsForBatch(b);
               return { ...b, status: 'In Production' };
             }
             return b;
@@ -1502,6 +1526,106 @@ export const PortalProvider = ({ children }) => {
     }));
   };
 
+  // Dynamically compute real-time alerts and warnings
+  const warnings = useMemo(() => {
+    const list = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const getLocalDate = (dateStr) => {
+      if (!dateStr) return new Date();
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    };
+
+    // 1. Low Stock Warnings
+    const rawMaterialsKeys = ['Jar & Lid', 'Canister', 'Bottle & Pump'];
+    Object.entries(inventory).forEach(([item, qty]) => {
+      const isRaw = rawMaterialsKeys.includes(item);
+      const threshold = isRaw ? 500 : 150;
+      if (qty < threshold) {
+        list.push({
+          id: `warn-low-stock-${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+          type: 'low_stock',
+          title: `Low Stock Alert: ${item}`,
+          subtitle: `Current: ${qty} units (Threshold: ${threshold})`,
+          description: `The stock level for "${item}" is currently ${qty} units, which is below the safety threshold of ${threshold} units. Replenish this item to avoid production interruptions.`,
+          severity: qty < (threshold / 2) ? 'high' : 'medium',
+          referenceId: item,
+          actionText: 'Adjust Stock / Order',
+          actionTab: 'inventory'
+        });
+      }
+    });
+
+    // 2. Expired PO Warnings
+    purchaseOrders.forEach(po => {
+      if (['Fully Served', 'Closed', 'Draft', 'Requested'].includes(po.status)) return;
+      if (!po.endDate) return;
+      const poDate = getLocalDate(po.endDate);
+      if (poDate < today) {
+        const diffTime = today - poDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        list.push({
+          id: `warn-expired-po-${po.id}`,
+          type: 'expired_po',
+          title: `Purchase Order Expired: ${po.poNumber}`,
+          subtitle: `${po.vendor} • Overdue by ${diffDays} day${diffDays === 1 ? '' : 's'}`,
+          description: `Purchase Order ${po.poNumber} for "${po.itemType}" from supplier "${po.vendor}" was scheduled for delivery on ${po.endDate}. It is currently ${diffDays} day${diffDays === 1 ? '' : 's'} overdue and has not been fully served or closed.`,
+          severity: 'high',
+          referenceId: po.id,
+          actionText: 'Manage Purchase Orders',
+          actionTab: 'pos'
+        });
+      }
+    });
+
+    // 3. Due Date Near Warnings (POs & Active Batches within 3 days)
+    purchaseOrders.forEach(po => {
+      if (['Fully Served', 'Closed', 'Draft', 'Requested'].includes(po.status)) return;
+      if (!po.endDate) return;
+      const poDate = getLocalDate(po.endDate);
+      const diffTime = poDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays <= 3) {
+        list.push({
+          id: `warn-near-po-${po.id}`,
+          type: 'due_near',
+          title: `PO Due Date Approaching: ${po.poNumber}`,
+          subtitle: `${po.vendor} • Due in ${diffDays} day${diffDays === 1 ? '' : 's'}`,
+          description: `Delivery for Purchase Order ${po.poNumber} (${po.itemType}) from "${po.vendor}" is expected on ${po.endDate} (in ${diffDays} day${diffDays === 1 ? '' : 's'}). Monitor shipment status.`,
+          severity: 'medium',
+          referenceId: po.id,
+          actionText: 'Manage Purchase Orders',
+          actionTab: 'pos'
+        });
+      }
+    });
+
+    batches.forEach(b => {
+      if (b.status === 'Completed') return;
+      if (!b.endDate) return;
+      const bDate = getLocalDate(b.endDate);
+      const diffTime = bDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays <= 3) {
+        list.push({
+          id: `warn-near-batch-${b.id}`,
+          type: 'due_near',
+          title: `Batch Production Deadline Near: ${b.name}`,
+          subtitle: `Deadline: ${b.endDate} (in ${diffDays} day${diffDays === 1 ? '' : 's'})`,
+          description: `Active production run "${b.name}" has its completion date set to ${b.endDate}, which is in ${diffDays} day${diffDays === 1 ? '' : 's'}. Verify that all active POs are serving this run.`,
+          severity: 'medium',
+          referenceId: b.id,
+          actionText: 'Production Batches',
+          actionTab: 'batches'
+        });
+      }
+    });
+
+    return list;
+  }, [inventory, purchaseOrders, batches]);
+
   // Clear Database (Clean Slate)
   const clearDatabase = () => {
     setBatches([]);
@@ -1572,7 +1696,8 @@ export const PortalProvider = ({ children }) => {
         companyConfig,
         setCompanyConfig,
         vendorsConfig,
-        setVendorsConfig
+        setVendorsConfig,
+        warnings
       }}
     >
       {children}

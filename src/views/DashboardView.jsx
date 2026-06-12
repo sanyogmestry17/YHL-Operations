@@ -30,7 +30,7 @@ const formatYAxisTicks = (value) => {
 };
 
 export default function DashboardView({ setActiveTab }) {
-  const { batches, purchaseOrders, invoices, inventory, products, notifications } = usePortal();
+  const { batches, purchaseOrders, invoices, inventory, products, notifications, warnings } = usePortal();
 
   // Calculations
   const activeBatchesCount = batches.filter(b => b.status !== 'Completed').length;
@@ -42,12 +42,8 @@ export default function DashboardView({ setActiveTab }) {
   const totalPOAmount = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
   const totalInvoicedAmount = invoices.reduce((sum, inv) => sum + inv.invoiceAmount, 0);
 
-  // Check low stock
-  const rawMaterialsKeys = ['Jar & Lid', 'Canister', 'Bottle & Pump'];
-  const lowStockItems = Object.entries(inventory).filter(([item, qty]) => {
-    const isRaw = rawMaterialsKeys.includes(item);
-    return qty < (isRaw ? 500 : 150);
-  });
+  // Check low stock warnings
+  const lowStockItems = warnings.filter(w => w.type === 'low_stock');
 
   // Recharts Data: Group PO and Invoice amounts by Batch
   const chartData = batches.map(b => {
@@ -139,17 +135,31 @@ export default function DashboardView({ setActiveTab }) {
           <p className="page-subtitle" style={{ fontSize: '0.75rem' }}>Total Invoiced value vs PO Budget</p>
         </div>
 
-        <div className="glass-card kpi-card" style={{ borderColor: lowStockItems.length > 0 ? 'var(--color-rose)' : 'var(--border-color)' }}>
-          <div className="kpi-title">Inventory Alerts</div>
+        <div 
+          className="glass-card kpi-card alert-kpi-card" 
+          style={{ 
+            borderColor: warnings.length > 0 ? 'var(--color-rose)' : 'var(--border-color)',
+            cursor: 'pointer',
+            transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s'
+          }}
+          onClick={() => setActiveTab('warnings')}
+          title="Click to view warnings details"
+        >
+          <div className="kpi-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <span>Inventory Alerts</span>
+            <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)', fontWeight: 600 }}>Click to Details</span>
+          </div>
           <div className="kpi-val-container">
-            <div className="kpi-value" style={{ color: lowStockItems.length > 0 ? 'var(--color-rose)' : 'var(--color-emerald)' }}>
-              {lowStockItems.length > 0 ? `${lowStockItems.length} Warnings` : 'All Healthy'}
+            <div className="kpi-value" style={{ color: warnings.length > 0 ? 'var(--color-rose)' : 'var(--color-emerald)' }}>
+              {warnings.length > 0 ? `${warnings.length} Warning${warnings.length === 1 ? '' : 's'}` : 'All Healthy'}
             </div>
-            <div className="kpi-icon-wrapper" style={{ color: lowStockItems.length > 0 ? 'var(--color-rose)' : 'var(--color-emerald)' }}>
-              {lowStockItems.length > 0 ? <AlertTriangle size={20} /> : <Package size={20} />}
+            <div className="kpi-icon-wrapper" style={{ color: warnings.length > 0 ? 'var(--color-rose)' : 'var(--color-emerald)' }}>
+              {warnings.length > 0 ? <AlertTriangle size={20} /> : <Package size={20} />}
             </div>
           </div>
-          <p className="page-subtitle" style={{ fontSize: '0.75rem' }}>Stock levels below safety thresholds</p>
+          <p className="page-subtitle" style={{ fontSize: '0.75rem' }}>
+            {warnings.length > 0 ? `${warnings.filter(w => w.type === 'low_stock').length} low stock • ${warnings.filter(w => w.type === 'expired_po').length + warnings.filter(w => w.type === 'due_near').length} delivery issues` : 'Stock and schedules are healthy'}
+          </p>
         </div>
       </div>
 
@@ -288,31 +298,35 @@ export default function DashboardView({ setActiveTab }) {
           <div className="glass-panel" style={{ padding: '1.5rem' }}>
             <h3 style={{ marginBottom: '1.25rem', fontSize: '1rem', fontWeight: 600 }}>Stock Summary</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {Object.entries(inventory).slice(0, 5).map(([item, qty]) => {
-                const isRaw = ['Jar & Lid', 'Canister', 'Bottle & Pump'].includes(item);
-                const isLow = qty < (isRaw ? 500 : 150);
-                const maxCapacity = isRaw ? 3000 : 1000;
-                return (
-                  <div key={item} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>{item}</span>
-                      <span style={{ fontWeight: 600, color: isLow ? 'var(--color-rose)' : 'var(--text-main)' }}>
-                        {qty} {isLow && '⚠️'}
-                      </span>
+              {(() => {
+                const itemsToDisplay = ['Jar & Lid', 'Canister', 'Bottle & Pump', 'Omega-3', 'Pure Skin'];
+                return itemsToDisplay.map((item) => {
+                  const qty = inventory[item] !== undefined ? inventory[item] : 0;
+                  const isRaw = ['Jar & Lid', 'Canister', 'Bottle & Pump'].includes(item);
+                  const isLow = qty < (isRaw ? 500 : 150);
+                  const maxCapacity = isRaw ? 3000 : 1000;
+                  return (
+                    <div key={item} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>{item}</span>
+                        <span style={{ fontWeight: 600, color: isLow ? 'var(--color-rose)' : 'var(--text-main)' }}>
+                          {qty.toLocaleString()} {isLow && '⚠️'}
+                        </span>
+                      </div>
+                      <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div 
+                          style={{ 
+                            width: `${Math.min(100, (qty / maxCapacity) * 100)}%`, 
+                            height: '100%', 
+                            background: isLow ? 'var(--grad-danger)' : 'var(--grad-primary)',
+                            borderRadius: '2px'
+                          }} 
+                        />
+                      </div>
                     </div>
-                    <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div 
-                        style={{ 
-                          width: `${Math.min(100, (qty / maxCapacity) * 100)}%`, 
-                          height: '100%', 
-                          background: isLow ? 'var(--grad-danger)' : 'var(--grad-primary)',
-                          borderRadius: '2px'
-                        }} 
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
             <button 
               className="glass-btn" 

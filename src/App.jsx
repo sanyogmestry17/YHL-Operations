@@ -19,6 +19,7 @@ import InvoicesView from './views/InvoicesView';
 import InventoryView from './views/InventoryView';
 import ExportView from './views/ExportView';
 import ConfigurationView from './views/ConfigurationView';
+import WarningsView from './views/WarningsView';
 
 function MainAppLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -204,6 +205,7 @@ function MainAppLayout() {
         {activeTab === 'inventory' && <InventoryView />}
         {activeTab === 'export' && <ExportView />}
         {activeTab === 'configuration' && <ConfigurationView />}
+        {activeTab === 'warnings' && <WarningsView setActiveTab={setActiveTab} />}
       </main>
 
       {/* Notifications Drawer Slider */}
