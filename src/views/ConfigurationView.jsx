@@ -32,12 +32,30 @@ export default function ConfigurationView() {
     vendorsConfig, 
     setVendorsConfig,
     clearDatabase, 
-    importDatabase 
+    importDatabase,
+    hasSupabase,
+    safetyThresholds,
+    setSafetyThresholds
   } = usePortal();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
   const [editingProduct, setEditingProduct] = useState(null);
+
+  const [tempThresholds, setTempThresholds] = useState({});
+
+  // Sync safetyThresholds from context to local temp state
+  React.useEffect(() => {
+    if (safetyThresholds) {
+      setTempThresholds(safetyThresholds);
+    }
+  }, [safetyThresholds]);
+
+  const handleSaveThresholds = (e) => {
+    e.preventDefault();
+    setSafetyThresholds(tempThresholds);
+    alert('Inventory safety thresholds updated successfully!');
+  };
 
   // Company Config local state
   const [compInvoiceName, setCompInvoiceName] = useState(companyConfig?.invoiceToName || '');
@@ -393,6 +411,19 @@ export default function ConfigurationView() {
         >
           Supplier Registry
         </button>
+        <button 
+          className="glass-btn" 
+          style={{ 
+            background: activeTab === 'thresholds' ? 'var(--grad-primary)' : 'transparent', 
+            color: activeTab === 'thresholds' ? '#fff' : 'var(--text-muted)',
+            borderColor: activeTab === 'thresholds' ? 'var(--color-cyan)' : 'transparent',
+            fontWeight: 600,
+            fontSize: '0.85rem'
+          }}
+          onClick={() => setActiveTab('thresholds')}
+        >
+          Safety Thresholds
+        </button>
       </div>
 
       {/* Product Catalog Tab */}
@@ -443,9 +474,13 @@ export default function ConfigurationView() {
 
           {/* Database Management & Backups Panel */}
           <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '1.5rem', borderLeft: '4px solid var(--color-rose)' }}>
-            <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>Live Production Database Actions</h3>
+            <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>
+              {hasSupabase ? "Production Database Actions" : "Local Workspace Actions"}
+            </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-              Export data backups to JSON, upload backups to restore settings, or clear mock logs to start real-life recording.
+              {hasSupabase 
+                ? "Export live production database tables to JSON, upload backups to restore tables, or reset production tables."
+                : "Export local workspace cache to JSON, upload backups to restore settings, or clear mock logs to reset data."}
             </p>
             
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -508,13 +543,15 @@ export default function ConfigurationView() {
                 className="glass-btn-danger" 
                 style={{ marginLeft: 'auto' }}
                 onClick={() => {
-                  if (window.confirm('WARNING: Are you sure you want to clear the entire database? This will clear all Batches, POs, Invoices, and reset stock levels to 0. This cannot be undone.')) {
+                  if (window.confirm(hasSupabase 
+                    ? 'WARNING: Are you sure you want to clean slate the live database? This will clear all Batches, POs, Invoices, and reset stock levels to 0 in Supabase. This cannot be undone.'
+                    : 'WARNING: Are you sure you want to clear the entire database? This will clear all Batches, POs, Invoices, and reset stock levels to 0. This cannot be undone.')) {
                     clearDatabase();
-                    alert('Database cleared! Start with a clean slate.');
+                    alert(hasSupabase ? 'Production database cleared!' : 'Database cleared! Start with a clean slate.');
                   }
                 }}
               >
-                ⚠️ Clear Mock Data (Reset System)
+                {hasSupabase ? "⚠️ Reset Production Database (Clean Slate)" : "⚠️ Reset Local Database (Clear Mock Data)"}
               </button>
             </div>
           </div>
@@ -696,6 +733,61 @@ export default function ConfigurationView() {
               )}
               <button type="submit" className="glass-btn-primary">
                 {selectedVendorKey ? 'Save Supplier' : 'Register Supplier'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Safety Thresholds Tab */}
+      {activeTab === 'thresholds' && (
+        <div className="glass-panel" style={{ padding: '1.5rem', animation: 'scale-up 0.2s ease-out' }}>
+          <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600 }}>Inventory Safety Thresholds</h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            Set safety stock thresholds for raw materials and finished products. The system will flag warnings when inventory falls below these values.
+          </p>
+
+          <form onSubmit={handleSaveThresholds} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="glass-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ background: 'var(--bg-table-header)', borderBottom: '1px solid var(--border-color)' }}>
+                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Item Name</th>
+                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>Category</th>
+                    <th style={{ padding: '0.75rem 1rem', fontWeight: 600, width: '200px' }}>Safety Threshold (Units)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(safetyThresholds).map((item) => {
+                    const isRaw = ['Jar & Lid', 'Canister', 'Bottle & Pump'].includes(item);
+                    return (
+                      <tr key={item} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-main)' }}>{item}</td>
+                        <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)' }}>
+                          {isRaw ? 'Packaging & Raw Material' : 'Finished Product'}
+                        </td>
+                        <td style={{ padding: '0.5rem 1rem' }}>
+                          <input 
+                            type="number"
+                            className="glass-input"
+                            style={{ padding: '0.35rem 0.5rem', height: '32px', fontSize: '0.85rem' }}
+                            value={tempThresholds[item] !== undefined ? tempThresholds[item] : safetyThresholds[item]}
+                            onChange={(e) => {
+                              const val = Math.max(0, parseInt(e.target.value) || 0);
+                              setTempThresholds(prev => ({ ...prev, [item]: val }));
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <button type="submit" className="glass-btn-primary">
+                <Save size={16} /> Save Thresholds
               </button>
             </div>
           </form>

@@ -276,6 +276,21 @@ const DEFAULT_USERS = [
   { id: 'u-3', email: 'accounts@yourhappylife.com', password: 'accts123', name: 'Accounts Manager', role: 'Accounts' }
 ];
 
+// Default Safety Thresholds
+const DEFAULT_THRESHOLDS = {
+  'Jar & Lid': 500,
+  'Canister': 500,
+  'Bottle & Pump': 500,
+  'Omega-3': 150,
+  'Pure Skin': 150,
+  'Mag 5x Pro': 150,
+  'Core Detox': 150,
+  'Hair Revive': 150,
+  'Collagen Naked': 150,
+  'Collagen Reglow': 150,
+  'Magnesium Lotion': 150
+};
+
 // Initial Mock Data
 const MOCK_BATCHES = [
   {
@@ -586,6 +601,21 @@ export const PortalProvider = ({ children }) => {
     return saved ? saved : 'Operations';
   });
 
+  const [isQuickLoginEnabled, setIsQuickLoginEnabled] = useState(() => {
+    const saved = localStorage.getItem('yhl_quick_login');
+    return saved ? saved === 'true' : true;
+  });
+
+  const [safetyThresholds, setSafetyThresholds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yhl_safety_thresholds');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load safety thresholds:", e);
+    }
+    return DEFAULT_THRESHOLDS;
+  });
+
   const [companyConfig, setCompanyConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('yhl_company_config');
@@ -688,6 +718,14 @@ export const PortalProvider = ({ children }) => {
     localStorage.setItem('yhl_users', JSON.stringify(users));
   }, [users]);
 
+  useEffect(() => {
+    localStorage.setItem('yhl_quick_login', isQuickLoginEnabled ? 'true' : 'false');
+  }, [isQuickLoginEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('yhl_safety_thresholds', JSON.stringify(safetyThresholds));
+  }, [safetyThresholds]);
+
   // --- Supabase DB Load & Synchronization ---
   const [isDbLoading, setIsDbLoading] = useState(hasSupabase);
 
@@ -712,6 +750,10 @@ export const PortalProvider = ({ children }) => {
           const vendRow = configRows.find(r => r.key === 'vendors_config');
           if (vendRow) setVendorsConfig(vendRow.value);
           else await supabase.from('config_settings').insert({ key: 'vendors_config', value: vendorsConfig });
+
+          const threshRow = configRows.find(r => r.key === 'safety_thresholds');
+          if (threshRow) setSafetyThresholds(threshRow.value);
+          else await supabase.from('config_settings').insert({ key: 'safety_thresholds', value: safetyThresholds });
         }
 
         // 2. Fetch Batches
@@ -848,6 +890,11 @@ export const PortalProvider = ({ children }) => {
     if (!hasSupabase || isDbLoading) return;
     supabase.from('config_settings').upsert({ key: 'vendors_config', value: vendorsConfig });
   }, [vendorsConfig, isDbLoading]);
+
+  useEffect(() => {
+    if (!hasSupabase || isDbLoading) return;
+    supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: safetyThresholds });
+  }, [safetyThresholds, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
@@ -1651,7 +1698,7 @@ export const PortalProvider = ({ children }) => {
     const rawMaterialsKeys = ['Jar & Lid', 'Canister', 'Bottle & Pump'];
     Object.entries(inventory).forEach(([item, qty]) => {
       const isRaw = rawMaterialsKeys.includes(item);
-      const threshold = isRaw ? 500 : 150;
+      const threshold = safetyThresholds[item] !== undefined ? safetyThresholds[item] : (isRaw ? 500 : 150);
       if (qty < threshold) {
         list.push({
           id: `warn-low-stock-${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
@@ -1733,7 +1780,7 @@ export const PortalProvider = ({ children }) => {
     });
 
     return list;
-  }, [inventory, purchaseOrders, batches]);
+  }, [inventory, purchaseOrders, batches, safetyThresholds]);
 
   // Authentication & User Management Helper Functions
   const login = (email, password) => {
@@ -1771,19 +1818,37 @@ export const PortalProvider = ({ children }) => {
   };
 
   // Clear Database (Clean Slate)
-  const clearDatabase = () => {
+  const clearDatabase = async () => {
     setBatches([]);
     setPurchaseOrders([]);
     setInvoices([]);
     setCarryForwards([]);
     setNotifications([]);
-    setInventory((prev) => {
-      const cleared = {};
-      Object.keys(prev).forEach((key) => {
-        cleared[key] = 0;
-      });
-      return cleared;
+    const clearedInventory = {};
+    Object.keys(inventory).forEach((key) => {
+      clearedInventory[key] = 0;
     });
+    setInventory(clearedInventory);
+
+    if (hasSupabase) {
+      try {
+        await supabase.from('batches').delete().neq('id', 'placeholder');
+        await supabase.from('purchase_orders').delete().neq('id', 'placeholder');
+        await supabase.from('invoices').delete().neq('id', 'placeholder');
+        await supabase.from('carry_forwards').delete().neq('id', 'placeholder');
+        await supabase.from('notifications').delete().neq('id', 'placeholder');
+        
+        const rows = Object.keys(inventory).map(item_name => ({
+          item_name,
+          quantity: 0
+        }));
+        if (rows.length > 0) {
+          await supabase.from('inventory').upsert(rows);
+        }
+      } catch (e) {
+        console.warn("Failed to clear remote database:", e);
+      }
+    }
   };
 
   // Import Database JSON
@@ -1847,7 +1912,12 @@ export const PortalProvider = ({ children }) => {
         login,
         logout,
         addUser,
-        deleteUser
+        deleteUser,
+        hasSupabase,
+        isQuickLoginEnabled,
+        setIsQuickLoginEnabled,
+        safetyThresholds,
+        setSafetyThresholds
       }}
     >
       {children}

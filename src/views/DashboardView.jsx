@@ -30,7 +30,7 @@ const formatYAxisTicks = (value) => {
 };
 
 export default function DashboardView({ setActiveTab }) {
-  const { batches, purchaseOrders, invoices, inventory, products, notifications, warnings } = usePortal();
+  const { batches, purchaseOrders, invoices, inventory, products, notifications, warnings, safetyThresholds } = usePortal();
 
   // Calculations
   const activeBatchesCount = batches.filter(b => b.status !== 'Completed').length;
@@ -303,7 +303,8 @@ export default function DashboardView({ setActiveTab }) {
                 return itemsToDisplay.map((item) => {
                   const qty = inventory[item] !== undefined ? inventory[item] : 0;
                   const isRaw = ['Jar & Lid', 'Canister', 'Bottle & Pump'].includes(item);
-                  const isLow = qty < (isRaw ? 500 : 150);
+                  const threshold = safetyThresholds[item] !== undefined ? safetyThresholds[item] : (isRaw ? 500 : 150);
+                  const isLow = qty < threshold;
                   const maxCapacity = isRaw ? 3000 : 1000;
                   return (
                     <div key={item} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

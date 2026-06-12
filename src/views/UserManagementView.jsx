@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function UserManagementView() {
-  const { users, currentUser, addUser, deleteUser } = usePortal();
+  const { users, currentUser, addUser, deleteUser, isQuickLoginEnabled, setIsQuickLoginEnabled } = usePortal();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // New User Form State
@@ -73,9 +73,34 @@ export default function UserManagementView() {
           </h1>
           <p className="page-subtitle">Manage corporate user accounts, access keys, and system permissions</p>
         </div>
-        <button className="glass-btn-primary" onClick={() => setIsModalOpen(true)}>
-          <UserPlus size={16} /> Create User
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: 'var(--bg-glass-input)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '8px',
+            padding: '0.5rem 0.85rem',
+            cursor: 'pointer',
+            fontSize: '0.8rem',
+            color: 'var(--text-main)',
+            userSelect: 'none',
+            height: '38px',
+            boxSizing: 'border-box'
+          }}>
+            <input 
+              type="checkbox" 
+              checked={isQuickLoginEnabled} 
+              onChange={(e) => setIsQuickLoginEnabled(e.target.checked)}
+              style={{ cursor: 'pointer', accentColor: 'var(--color-cyan)' }}
+            />
+            <span style={{ fontWeight: 500 }}>Enable Quick Login Presets</span>
+          </label>
+          <button className="glass-btn-primary" onClick={() => setIsModalOpen(true)}>
+            <UserPlus size={16} /> Create User
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Grid */}

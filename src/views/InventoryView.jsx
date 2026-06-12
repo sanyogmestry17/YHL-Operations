@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function InventoryView() {
-  const { inventory, invoices, purchaseOrders, adjustStock } = usePortal();
+  const { inventory, invoices, purchaseOrders, adjustStock, safetyThresholds } = usePortal();
   
   // Local Adjustment Form State
   const [selectedItem, setSelectedItem] = useState('');
@@ -87,11 +87,13 @@ export default function InventoryView() {
             <div className="grid-cols-3" style={{ gap: '1rem' }}>
               {rawMaterialsKeys.map(key => {
                 const qty = inventory[key] || 0;
-                const isLow = qty < 500;
+                const threshold = safetyThresholds[key] !== undefined ? safetyThresholds[key] : 500;
+                const isLow = qty < threshold;
                 return (
                   <div key={key} className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderColor: isLow ? 'rgba(244,63,94,0.2)' : 'var(--border-color)' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>{key}</span>
                     <strong style={{ fontSize: '1.5rem', color: isLow ? 'var(--color-rose)' : 'var(--text-main)' }}>{qty.toLocaleString()}</strong>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>Threshold: {threshold}</div>
                     <div style={{ width: '100%', height: '4px', background: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden', marginTop: '0.25rem' }}>
                       <div 
                         style={{ 
@@ -120,12 +122,13 @@ export default function InventoryView() {
             <div className="grid-cols-2" style={{ gap: '1rem' }}>
               {finishedGoodsKeys.map(key => {
                 const qty = inventory[key] || 0;
-                const isLow = qty < 150;
+                const threshold = safetyThresholds[key] !== undefined ? safetyThresholds[key] : 150;
+                const isLow = qty < threshold;
                 return (
                   <div key={key} style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '10px' }}>
                     <div>
                       <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>{key}</span>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>Ready for Dispatch</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>Threshold: {threshold}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ 

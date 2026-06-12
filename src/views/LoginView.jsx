@@ -3,7 +3,7 @@ import { usePortal } from '../context/PortalContext';
 import { ShieldAlert, ShieldCheck, Mail, Lock, LogIn } from 'lucide-react';
 
 export default function LoginView() {
-  const { login } = usePortal();
+  const { login, isQuickLoginEnabled } = usePortal();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -196,80 +196,84 @@ export default function LoginView() {
           </button>
         </form>
 
-        {/* Developer Quick-logins divider */}
-        <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
-          <div style={{ flexGrow: 1, height: '1px', background: 'var(--border-color)' }} />
-          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dark)', fontWeight: 600, padding: '0 0.75rem' }}>
-            Quick Presets
-          </span>
-          <div style={{ flexGrow: 1, height: '1px', background: 'var(--border-color)' }} />
-        </div>
-
-        {/* Quick Logins Row */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          <button 
-            className="glass-btn" 
-            style={{ 
-              padding: '0.5rem 0.75rem', 
-              fontSize: '0.75rem', 
-              justifyContent: 'space-between',
-              background: 'rgba(255,255,255,0.02)'
-            }}
-            onClick={() => handleQuickLogin('tech@yourhappylife.com', 'admin123')}
-            disabled={isLoading}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShieldCheck size={14} color="var(--color-rose)" />
-              <div style={{ textAlign: 'left' }}>
-                <strong style={{ color: '#fff' }}>Super Admin</strong>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>tech@yourhappylife.com</div>
-              </div>
+        {isQuickLoginEnabled && (
+          <>
+            {/* Developer Quick-logins divider */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
+              <div style={{ flexGrow: 1, height: '1px', background: 'var(--border-color)' }} />
+              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-dark)', fontWeight: 600, padding: '0 0.75rem' }}>
+                Quick Presets
+              </span>
+              <div style={{ flexGrow: 1, height: '1px', background: 'var(--border-color)' }} />
             </div>
-            <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
-          </button>
 
-          <button 
-            className="glass-btn" 
-            style={{ 
-              padding: '0.5rem 0.75rem', 
-              fontSize: '0.75rem', 
-              justifyContent: 'space-between',
-              background: 'rgba(255,255,255,0.02)'
-            }}
-            onClick={() => handleQuickLogin('ops@yourhappylife.com', 'ops123')}
-            disabled={isLoading}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <LogIn size={14} color="var(--color-cyan)" />
-              <div style={{ textAlign: 'left' }}>
-                <strong style={{ color: '#fff' }}>Operations view</strong>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>ops@yourhappylife.com</div>
-              </div>
-            </div>
-            <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
-          </button>
+            {/* Quick Logins Row */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              <button 
+                className="glass-btn" 
+                style={{ 
+                  padding: '0.5rem 0.75rem', 
+                  fontSize: '0.75rem', 
+                  justifyContent: 'space-between',
+                  background: 'rgba(255,255,255,0.02)'
+                }}
+                onClick={() => handleQuickLogin('tech@yourhappylife.com', 'admin123')}
+                disabled={isLoading}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShieldCheck size={14} color="var(--color-rose)" />
+                  <div style={{ textAlign: 'left' }}>
+                    <strong style={{ color: '#fff' }}>Super Admin</strong>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>tech@yourhappylife.com</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
+              </button>
 
-          <button 
-            className="glass-btn" 
-            style={{ 
-              padding: '0.5rem 0.75rem', 
-              fontSize: '0.75rem', 
-              justifyContent: 'space-between',
-              background: 'rgba(255,255,255,0.02)'
-            }}
-            onClick={() => handleQuickLogin('accounts@yourhappylife.com', 'accts123')}
-            disabled={isLoading}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <LogIn size={14} color="var(--color-emerald)" />
-              <div style={{ textAlign: 'left' }}>
-                <strong style={{ color: '#fff' }}>Accounts view</strong>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>accounts@yourhappylife.com</div>
-              </div>
+              <button 
+                className="glass-btn" 
+                style={{ 
+                  padding: '0.5rem 0.75rem', 
+                  fontSize: '0.75rem', 
+                  justifyContent: 'space-between',
+                  background: 'rgba(255,255,255,0.02)'
+                }}
+                onClick={() => handleQuickLogin('ops@yourhappylife.com', 'ops123')}
+                disabled={isLoading}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <LogIn size={14} color="var(--color-cyan)" />
+                  <div style={{ textAlign: 'left' }}>
+                    <strong style={{ color: '#fff' }}>Operations view</strong>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>ops@yourhappylife.com</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
+              </button>
+
+              <button 
+                className="glass-btn" 
+                style={{ 
+                  padding: '0.5rem 0.75rem', 
+                  fontSize: '0.75rem', 
+                  justifyContent: 'space-between',
+                  background: 'rgba(255,255,255,0.02)'
+                }}
+                onClick={() => handleQuickLogin('accounts@yourhappylife.com', 'accts123')}
+                disabled={isLoading}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <LogIn size={14} color="var(--color-emerald)" />
+                  <div style={{ textAlign: 'left' }}>
+                    <strong style={{ color: '#fff' }}>Accounts view</strong>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dark)' }}>accounts@yourhappylife.com</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
+              </button>
             </div>
-            <span style={{ fontSize: '0.65rem', color: 'var(--color-cyan)' }}>Auto Log In →</span>
-          </button>
-        </div>
+          </>
+        )}
 
       </div>
     </div>
