@@ -135,6 +135,7 @@ export default function InvoicesView() {
               <th>PO Number</th>
               <th>Batch</th>
               <th>Vendor</th>
+              <th>Destination</th>
               <th>Item Type</th>
               <th>Quantity</th>
               <th>Unit Price</th>
@@ -145,7 +146,7 @@ export default function InvoicesView() {
           <tbody>
             {filteredInvoices.length === 0 ? (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                <td colSpan={11} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
                   No Invoices found matching your search.
                 </td>
               </tr>
@@ -170,6 +171,7 @@ export default function InvoicesView() {
                       {batch?.id}
                     </td>
                     <td>{po?.vendor}</td>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--color-amber)', fontWeight: 500 }}>{inv.destination || 'N/A'}</td>
                     <td>{po?.itemType}</td>
                     <td style={{ fontWeight: 600 }}>{inv.quantityDelivered}</td>
                     <td>₹{inv.unitPrice.toFixed(2)}</td>
@@ -242,6 +244,13 @@ export default function InvoicesView() {
                     <strong style={{ fontSize: '1.1rem', color: 'var(--color-emerald)' }}>₹{selectedInvoice.invoiceAmount.toLocaleString('en-IN')}</strong>
                   </div>
                 </div>
+
+                {selectedInvoice.destination && (
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', fontSize: '0.8rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Delivery Destination</span>
+                    <strong style={{ color: 'var(--color-amber)' }}>{selectedInvoice.destination}</strong>
+                  </div>
+                )}
 
                 {selectedInvoice.logistics && (
                   <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', fontSize: '0.8rem' }}>

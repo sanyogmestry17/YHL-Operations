@@ -74,6 +74,7 @@ const mapDBInvoice = (row) => ({
   unitPrice: Number(row.unit_price),
   invoiceAmount: Number(row.invoice_amount),
   logistics: row.logistics || '',
+  destination: row.destination || '',
   notes: row.notes || '',
   pdfName: row.pdf_name || null,
   pdfUrl: row.pdf_url || null,
@@ -90,6 +91,7 @@ const mapUIInvoice = (inv) => ({
   unit_price: inv.unitPrice,
   invoice_amount: inv.invoiceAmount,
   logistics: inv.logistics,
+  destination: inv.destination,
   notes: inv.notes,
   pdf_name: inv.pdfName,
   pdf_url: inv.pdfUrl,
@@ -951,6 +953,16 @@ export const getLocalDateStr = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const DEFAULT_DESTINATIONS = [
+  'Bhiwandi Warehouse',
+  'Gurgaon Warehouse',
+  'Amazon Warehouse',
+  'HQ',
+  'Instamart',
+  'Blinkit',
+  'Tira'
+];
+
 export const PortalProvider = ({ children }) => {
   const [products, setProducts] = useState(() => {
     try {
@@ -1098,6 +1110,19 @@ export const PortalProvider = ({ children }) => {
     return DEFAULT_VENDORS_CONFIG;
   });
 
+  const [deliveryDestinations, setDeliveryDestinations] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yhl_delivery_destinations');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error("Failed to load delivery destinations:", e);
+    }
+    return DEFAULT_DESTINATIONS;
+  });
+
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('yhl_notifications');
@@ -1188,6 +1213,10 @@ export const PortalProvider = ({ children }) => {
     localStorage.setItem('yhl_safety_thresholds', JSON.stringify(safetyThresholds));
   }, [safetyThresholds]);
 
+  useEffect(() => {
+    localStorage.setItem('yhl_delivery_destinations', JSON.stringify(deliveryDestinations));
+  }, [deliveryDestinations]);
+
   // --- Supabase DB Load & Synchronization ---
   const [isDbLoading, setIsDbLoading] = useState(hasSupabase);
 
@@ -1216,6 +1245,10 @@ export const PortalProvider = ({ children }) => {
           const threshRow = configRows.find(r => r.key === 'safety_thresholds');
           if (threshRow) setSafetyThresholds(threshRow.value);
           else await supabase.from('config_settings').insert({ key: 'safety_thresholds', value: safetyThresholds });
+
+          const destRow = configRows.find(r => r.key === 'delivery_destinations');
+          if (destRow) setDeliveryDestinations(destRow.value);
+          else await supabase.from('config_settings').insert({ key: 'delivery_destinations', value: deliveryDestinations });
         }
 
         // 2. Fetch Batches
@@ -1840,6 +1873,7 @@ export const PortalProvider = ({ children }) => {
       unitPrice: invoiceItemsList[0]?.unitPrice || po.unitPrice, // fallback
       invoiceAmount: totalInvoiceAmt,
       logistics: invoiceData.logistics || '',
+      destination: invoiceData.destination || '',
       notes: invoiceData.notes || '',
       pdfName: invoiceData.pdfName || null,
       pdfUrl: invoiceData.pdfUrl || null,
@@ -2346,6 +2380,19 @@ export const PortalProvider = ({ children }) => {
     }
   };
 
+  const addDeliveryDestination = async (newDest) => {
+    if (!newDest || deliveryDestinations.includes(newDest)) return;
+    const updated = [...deliveryDestinations, newDest];
+    setDeliveryDestinations(updated);
+    if (hasSupabase) {
+      try {
+        await supabase.from('config_settings').upsert({ key: 'delivery_destinations', value: updated });
+      } catch (e) {
+        console.warn("Failed to update delivery destinations in Supabase:", e);
+      }
+    }
+  };
+
   return (
     <PortalContext.Provider
       value={{
@@ -2395,7 +2442,9 @@ export const PortalProvider = ({ children }) => {
         isQuickLoginEnabled,
         setIsQuickLoginEnabled,
         safetyThresholds,
-        setSafetyThresholds
+        setSafetyThresholds,
+        deliveryDestinations,
+        addDeliveryDestination
       }}
     >
       {children}

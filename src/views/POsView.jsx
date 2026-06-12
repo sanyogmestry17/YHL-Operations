@@ -25,12 +25,14 @@ export default function POsView() {
     addInvoice, 
     closePO,
     getLocalDateStr,
-    role,
-    generatePO,
-    updatePONotes,
-    companyConfig,
-    vendorsConfig,
-    createSinglePO
+    role, 
+    generatePO, 
+    updatePONotes, 
+    companyConfig, 
+    vendorsConfig, 
+    createSinglePO,
+    deliveryDestinations,
+    addDeliveryDestination
   } = usePortal();
 
   const [selectedPOId, setSelectedPOId] = useState(null);
@@ -44,6 +46,7 @@ export default function POsView() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(() => getLocalDateStr());
   const [logistics, setLogistics] = useState('');
+  const [deliveryDestination, setDeliveryDestination] = useState('');
   const [invoiceNotes, setInvoiceNotes] = useState('');
   const [invoicePDFName, setInvoicePDFName] = useState('');
   const [invoicePDFUrl, setInvoicePDFUrl] = useState('');
@@ -287,6 +290,7 @@ export default function POsView() {
       invoiceNumber,
       invoiceDate,
       logistics,
+      destination: deliveryDestination,
       notes: invoiceNotes,
       pdfName: invoicePDFName || null,
       pdfUrl: invoicePDFUrl || (invoicePDFName ? '#' : null),
@@ -296,6 +300,7 @@ export default function POsView() {
     // Reset Form
     setInvoiceNumber('');
     setLogistics('');
+    setDeliveryDestination('');
     setInvoiceNotes('');
     setInvoicePDFName('');
     setInvoicePDFUrl('');
@@ -1263,6 +1268,38 @@ export default function POsView() {
                   </div>
 
                   <div className="form-group">
+                    <label className="glass-label">Delivery Destination</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <select 
+                        className="glass-input" 
+                        value={deliveryDestination} 
+                        onChange={(e) => setDeliveryDestination(e.target.value)}
+                        required
+                      >
+                        <option value="">-- Select Destination --</option>
+                        {(deliveryDestinations || []).map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="glass-btn"
+                        style={{ flexShrink: 0, padding: '0.25rem 0.75rem', height: '38px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                        onClick={() => {
+                          const newDest = prompt("Enter new delivery destination:");
+                          if (newDest && newDest.trim()) {
+                            const trimmed = newDest.trim();
+                            addDeliveryDestination(trimmed);
+                            setDeliveryDestination(trimmed);
+                          }
+                        }}
+                      >
+                        + Add New
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
                     <label className="glass-label">Logistics / Transporter Details</label>
                     <input 
                       type="text" 
@@ -1366,6 +1403,7 @@ export default function POsView() {
                           <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{inv.invoiceNumber}</span>
                           <span style={{ color: 'var(--text-dark)', fontSize: '0.7rem' }}>Date: {inv.invoiceDate}</span>
                           {inv.logistics && <span style={{ color: 'var(--color-cyan)', fontSize: '0.7rem', display: 'block', marginTop: '0.15rem' }}>Logistics: {inv.logistics}</span>}
+                          {inv.destination && <span style={{ color: 'var(--color-amber)', fontSize: '0.7rem', display: 'block', marginTop: '0.15rem', fontWeight: 500 }}>Destination: {inv.destination}</span>}
                           {inv.notes && <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '0.25rem', fontStyle: 'italic', display: 'block' }}>"{inv.notes}"</span>}
                           {inv.pdfName && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.35rem', padding: '0.25rem 0.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', borderRadius: '6px', fontSize: '0.7rem', width: 'fit-content' }}>
