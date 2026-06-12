@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePortal } from '../context/PortalContext';
-import { ShieldAlert, ShieldCheck, Mail, Lock, LogIn } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginView() {
   const { login, isQuickLoginEnabled } = usePortal();
@@ -8,6 +8,7 @@ export default function LoginView() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -158,20 +159,41 @@ export default function LoginView() {
             </div>
           </div>
 
-          <div className="form-group">
+           <div className="form-group">
             <label className="glass-label" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dark)' }} />
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 className="glass-input" 
-                style={{ paddingLeft: '2.5rem', background: 'var(--bg-input)' }}
+                style={{ paddingLeft: '2.5rem', paddingRight: '2.75rem', background: 'var(--bg-input)' }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={isLoading}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-dark)',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  outline: 'none'
+                }}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
@@ -195,6 +217,27 @@ export default function LoginView() {
             )}
           </button>
         </form>
+
+        {/* Toggle to enable/disable presets view directly on login screen */}
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '0.25rem 0' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            userSelect: 'none'
+          }}>
+            <input 
+              type="checkbox" 
+              checked={isQuickLoginEnabled}
+              onChange={(e) => setIsQuickLoginEnabled(e.target.checked)}
+              style={{ cursor: 'pointer', accentColor: 'var(--color-cyan)' }}
+            />
+            <span>Show Developer Quick Presets</span>
+          </label>
+        </div>
 
         {isQuickLoginEnabled && (
           <>
