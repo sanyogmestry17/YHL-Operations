@@ -1,0 +1,136 @@
+:root {
+  /* LIGHT MODE (Default) */
+  --bg-main: #f8fafc; /* Slate 50 */
+  --bg-sidebar: #ffffff; /* Solid White for sidebar */
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #ffffff;
+  --bg-table-header: #f1f5f9;
+  
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
+  --border-glow: rgba(59, 130, 246, 0.06);
+
+  --bg-sidebar-item-hover: #f1f5f9;
+  --bg-sidebar-item-active: rgba(37, 99, 235, 0.06);
+  --border-sidebar-item-active: rgba(37, 99, 235, 0.15);
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); /* Clean Blue */
+  --grad-secondary: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --grad-success-real: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --grad-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --grad-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --grad-dark: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  
+  /* Solid Colors */
+  --color-cyan: #1d4ed8; /* Cobalt Blue in light mode */
+  --color-blue: #3b82f6;
+  --color-emerald: #10b981;
+  --color-amber: #d97706;
+  --color-rose: #ef4444;
+  --color-indigo: #4f46e5;
+  --color-purple: #9333ea;
+
+  /* Typography */
+  --text-main: #0f172a; /* Slate 900 */
+  --text-muted: #475569; /* Slate 600 */
+  --text-dark: #94a3b8; /* Slate 400 */
+  --font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Shadows and Glows */
+  --shadow-lg: 0 4px 18px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow-cyan: 0 0 8px rgba(37, 99, 235, 0.1);
+  --shadow-glow-emerald: 0 0 8px rgba(16, 185, 129, 0.1);
+  --shadow-glow-amber: 0 0 8px rgba(245, 158, 11, 0.1);
+  --shadow-glow-rose: 0 0 8px rgba(239, 68, 68, 0.1);
+  
+  /* Transition Speeds */
+  --trans-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Chart Config */
+  --chart-grid: #f1f5f9;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e2e8f0;
+  --chart-cursor-bg: rgba(15, 23, 42, 0.03);
+}
+
+/* DARK MODE */
+:root[data-theme="dark"] {
+  --bg-main: #090d16; /* Clean Dark Slate */
+  --bg-sidebar: #0f1322;
+  --bg-card: rgba(17, 26, 48, 0.65);
+  --bg-card-hover: rgba(23, 35, 64, 0.8);
+  --bg-input: rgba(10, 15, 30, 0.65);
+  --bg-table-header: rgba(15, 23, 42, 0.6);
+  
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color-hover: rgba(59, 130, 246, 0.25);
+  --border-glow: rgba(59, 130, 246, 0.12);
+
+  --bg-sidebar-item-hover: rgba(255, 255, 255, 0.03);
+  --bg-sidebar-item-active: rgba(59, 130, 246, 0.1);
+  --border-sidebar-item-active: rgba(59, 130, 246, 0.2);
+
+  --grad-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --grad-secondary: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+  --grad-success: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  --grad-success-real: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  --grad-warning: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  --grad-danger: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+  --grad-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+
+  --color-cyan: #3b82f6; /* Classic Blue Accent */
+  --color-blue: #60a5fa;
+  --color-emerald: #34d399;
+  --color-amber: #fbbf24;
+  --color-rose: #f87171;
+  --color-indigo: #818cf8;
+  --color-purple: #c084fc;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dark: #475569;
+
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  --shadow-glow-cyan: 0 0 12px rgba(59, 130, 246, 0.2);
+  --shadow-glow-emerald: 0 0 12px rgba(52, 211, 153, 0.15);
+  --shadow-glow-amber: 0 0 12px rgba(251, 191, 36, 0.15);
+  --shadow-glow-rose: 0 0 12px rgba(248, 113, 113, 0.15);
+
+  --chart-grid: rgba(255, 255, 255, 0.04);
+  --chart-tooltip-bg: #0f1322;
+  --chart-tooltip-border: rgba(255, 255, 255, 0.08);
+  --chart-cursor-bg: rgba(255, 255, 255, 0.04);
+}
+
+/* Custom Animation Keyframes */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 6px rgba(59, 130, 246, 0.15); }
+  50% { box-shadow: 0 0 14px rgba(59, 130, 246, 0.35); }
+  100% { box-shadow: 0 0 6px rgba(59, 130, 246, 0.15); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-up {
+  from { transform: scale(0.97); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
