@@ -878,42 +878,49 @@ export const PortalProvider = ({ children }) => {
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
-    supabase.from('config_settings').upsert({ key: 'products', value: products });
+    supabase.from('config_settings').upsert({ key: 'products', value: products })
+      .then(({ error }) => { if (error) console.error("Supabase sync products failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
   }, [products, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
-    supabase.from('config_settings').upsert({ key: 'company_config', value: companyConfig });
+    supabase.from('config_settings').upsert({ key: 'company_config', value: companyConfig })
+      .then(({ error }) => { if (error) console.error("Supabase sync company_config failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
   }, [companyConfig, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
-    supabase.from('config_settings').upsert({ key: 'vendors_config', value: vendorsConfig });
+    supabase.from('config_settings').upsert({ key: 'vendors_config', value: vendorsConfig })
+      .then(({ error }) => { if (error) console.error("Supabase sync vendors_config failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
   }, [vendorsConfig, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
-    supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: safetyThresholds });
+    supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: safetyThresholds })
+      .then(({ error }) => { if (error) console.error("Supabase sync safety_thresholds failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
   }, [safetyThresholds, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
     if (batches.length > 0) {
-      supabase.from('batches').upsert(batches.map(mapUIBatch));
+      supabase.from('batches').upsert(batches.map(mapUIBatch))
+        .then(({ error }) => { if (error) console.error("Supabase sync batches failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
     }
   }, [batches, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
     if (purchaseOrders.length > 0) {
-      supabase.from('purchase_orders').upsert(purchaseOrders.map(mapUIPO));
+      supabase.from('purchase_orders').upsert(purchaseOrders.map(mapUIPO))
+        .then(({ error }) => { if (error) console.error("Supabase sync purchase_orders failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
     }
   }, [purchaseOrders, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
     if (invoices.length > 0) {
-      supabase.from('invoices').upsert(invoices.map(mapUIInvoice));
+      supabase.from('invoices').upsert(invoices.map(mapUIInvoice))
+        .then(({ error }) => { if (error) console.error("Supabase sync invoices failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
     }
   }, [invoices, isDbLoading]);
 
@@ -925,7 +932,8 @@ export const PortalProvider = ({ children }) => {
         quantity
       }));
       if (rows.length > 0) {
-        await supabase.from('inventory').upsert(rows);
+        const { error } = await supabase.from('inventory').upsert(rows);
+        if (error) console.error("Supabase sync inventory failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error);
       }
     };
     syncInventory();
@@ -936,7 +944,7 @@ export const PortalProvider = ({ children }) => {
     const syncCFs = async () => {
       await supabase.from('carry_forwards').delete().neq('id', 'placeholder');
       if (carryForwards.length > 0) {
-        await supabase.from('carry_forwards').insert(carryForwards.map(cf => ({
+        const { error } = await supabase.from('carry_forwards').insert(carryForwards.map(cf => ({
           id: cf.id,
           product_id: cf.productId,
           item_type: cf.itemType,
@@ -944,6 +952,7 @@ export const PortalProvider = ({ children }) => {
           source_po_id: cf.sourcePOId,
           source_po_number: cf.sourcePONumber
         })));
+        if (error) console.error("Supabase sync carry_forwards failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error);
       }
     };
     syncCFs();
@@ -958,7 +967,8 @@ export const PortalProvider = ({ children }) => {
         date: n.timestamp,
         category: n.category || 'alert',
         read: n.read
-      })));
+      })))
+      .then(({ error }) => { if (error) console.error("Supabase sync notifications failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
     }
   }, [notifications, isDbLoading]);
 
