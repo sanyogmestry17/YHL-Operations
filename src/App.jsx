@@ -37,7 +37,8 @@ function MainAppLayout() {
     markAllNotificationsRead, 
     clearNotifications,
     currentUser,
-    logout
+    logout,
+    hasSupabase
   } = usePortal();
 
   if (!currentUser) {
@@ -142,6 +143,32 @@ function MainAppLayout() {
           </ul>
 
           <div className="sidebar-footer">
+            <div style={{ 
+              fontSize: '0.7rem', 
+              textAlign: 'center', 
+              color: hasSupabase ? 'var(--color-emerald)' : 'var(--color-rose)', 
+              background: 'rgba(255,255,255,0.02)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '6px', 
+              padding: '0.35rem', 
+              marginBottom: '0.5rem', 
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem'
+            }}>
+              <span style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                background: hasSupabase ? 'var(--color-emerald)' : 'var(--color-rose)',
+                display: 'inline-block',
+                boxShadow: hasSupabase ? '0 0 6px var(--color-emerald)' : '0 0 6px var(--color-rose)'
+              }} />
+              {hasSupabase ? "Supabase Connected" : "Offline Workspace Cache"}
+            </div>
+
             <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginBottom: '0.5rem' }}>
               <button className="theme-toggle-btn" style={{ flexGrow: 1 }} onClick={toggleTheme}>
                 {theme === 'light' ? '🌙 Light' : '☀️ Dark'}
