@@ -338,15 +338,17 @@ export default function BatchesView() {
                     }`}>
                       {batch.status}
                     </span>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleDeleteBatch(batch.id); }}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-dark)', cursor: 'pointer', padding: '0.2rem' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-rose)'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-dark)'}
-                      title="Delete Batch"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {role === 'Super Admin' && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteBatch(batch.id); }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dark)', cursor: 'pointer', padding: '0.2rem' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-rose)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-dark)'}
+                        title="Delete Batch"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 

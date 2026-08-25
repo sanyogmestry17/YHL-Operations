@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function InvoicesView() {
-  const { invoices, purchaseOrders, batches, updateInvoiceNotes } = usePortal();
+  const { invoices, purchaseOrders, batches, updateInvoiceNotes, deleteInvoice, role } = usePortal();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVendor, setFilterVendor] = useState('All');
@@ -178,7 +178,7 @@ export default function InvoicesView() {
                     <td style={{ fontWeight: 600, color: 'var(--color-emerald)' }}>
                       ₹{inv.invoiceAmount.toLocaleString('en-IN')}
                     </td>
-                    <td>
+                     <td style={{ display: 'flex', gap: '0.35rem' }}>
                       <button 
                         className="glass-btn" 
                         style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
@@ -186,6 +186,20 @@ export default function InvoicesView() {
                       >
                         Details
                       </button>
+                      {role === 'Super Admin' && (
+                        <button 
+                          className="glass-btn" 
+                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: 'var(--color-rose)' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Are you sure you want to delete Invoice "${inv.invoiceNumber}"? This will restore the PO balance and subtract delivered stock from inventory. This cannot be undone.`)) {
+                              deleteInvoice(inv.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -426,6 +440,22 @@ export default function InvoicesView() {
               ) : (
                 <div style={{ color: 'var(--text-dark)', fontSize: '0.8rem', textAlign: 'center', padding: '1rem', background: 'var(--bg-input)', border: '1px dashed var(--border-color)', borderRadius: '8px' }}>
                   No associated production batch found.
+                </div>
+              )}
+              {role === 'Super Admin' && (
+                <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+                  <button 
+                    className="glass-btn-danger" 
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to delete Invoice "${selectedInvoice.invoiceNumber}"? This will restore the PO balance and subtract delivered stock from inventory. This cannot be undone.`)) {
+                        deleteInvoice(selectedInvoice.id);
+                        setSelectedInvoiceId(null);
+                      }
+                    }}
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
+                    Delete Invoice (Permanently)
+                  </button>
                 </div>
               )}
             </div>

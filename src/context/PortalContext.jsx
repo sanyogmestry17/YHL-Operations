@@ -1857,12 +1857,138 @@ export const PortalProvider = ({ children }) => {
     return poId;
   };
 
-  const deleteBatch = (batchId) => {
+  const deleteBatch = async (batchId) => {
     setBatches((prev) => prev.filter((b) => b.id !== batchId));
     // Also delete associated POs & Invoices
     setPurchaseOrders((prev) => prev.filter((po) => po.batchId !== batchId));
     setInvoices((prev) => prev.filter((inv) => inv.batchId !== batchId));
+
+    if (hasSupabase) {
+      try {
+        await supabase.from('invoices').delete().eq('batch_id', batchId);
+        await supabase.from('purchase_orders').delete().eq('batch_id', batchId);
+        await supabase.from('batches').delete().eq('id', batchId);
+      } catch (e) {
+        console.error("Failed to delete batch and its associations from Supabase:", e);
+      }
+    }
   };
+
+  const deletePO = async (poId) => {
+    const associatedInvoices = invoices.filter((inv) => inv.poId === poId);
+    
+    // Reverse inventory for all associated invoices
+    setInventory((prev) => {
+      const updated = { ...prev };
+      associatedInvoices.forEach((inv) => {
+        const invoiceItemsList = inv.itemsList || [];
+        invoiceItemsList.forEach((invItem) => {
+          let stockItemKey = '';
+          if (invItem.itemType === 'Finished Goods') {
+            const prod = products.find((p) => p.id === invItem.productId);
+            stockItemKey = prod ? prod.name : '';
+          } else {
+            stockItemKey = invItem.itemType;
+          }
+          if (stockItemKey && updated[stockItemKey] !== undefined) {
+            updated[stockItemKey] = Math.max(0, updated[stockItemKey] - invItem.quantityDelivered);
+          }
+        });
+      });
+      return updated;
+    });
+
+    setPurchaseOrders((prev) => prev.filter((po) => po.id !== poId));
+    setInvoices((prev) => prev.filter((inv) => inv.poId !== poId));
+
+    if (hasSupabase) {
+      try {
+        await supabase.from('invoices').delete().eq('po_id', poId);
+        await supabase.from('purchase_orders').delete().eq('id', poId);
+      } catch (e) {
+        console.error("Failed to delete PO and its invoices from Supabase:", e);
+      }
+    }
+  };
+
+  const deleteInvoice = async (invoiceId) => {
+    const inv = invoices.find((i) => i.id === invoiceId);
+    if (!inv) return;
+
+    const po = purchaseOrders.find((p) => p.id === inv.poId);
+    const invoiceItemsList = inv.itemsList || [];
+
+    // 1. Subtract quantities from Inventory
+    setInventory((prev) => {
+      const updated = { ...prev };
+      invoiceItemsList.forEach((invItem) => {
+        let stockItemKey = '';
+        if (invItem.itemType === 'Finished Goods') {
+          const prod = products.find((p) => p.id === invItem.productId);
+          stockItemKey = prod ? prod.name : '';
+        } else {
+          stockItemKey = invItem.itemType;
+        }
+        if (stockItemKey && updated[stockItemKey] !== undefined) {
+          updated[stockItemKey] = Math.max(0, updated[stockItemKey] - invItem.quantityDelivered);
+        }
+      });
+      return updated;
+    });
+
+    // 2. Restore PO balance quantities and status
+    if (po) {
+      setPurchaseOrders((prev) =>
+        prev.map((p) => {
+          if (p.id === po.id) {
+            const restoredItemsList = (p.itemsList || []).map(item => {
+              const deliveredItem = invoiceItemsList.find(i => i.productId === item.productId && i.itemType === item.itemType);
+              const delQty = deliveredItem ? deliveredItem.quantityDelivered : 0;
+              const restoredBal = Math.min(item.orderedQuantity, item.balanceQuantity + delQty);
+              return {
+                ...item,
+                balanceQuantity: restoredBal
+              };
+            });
+
+            const totalBalance = restoredItemsList.reduce((sum, item) => sum + item.balanceQuantity, 0);
+            const totalOrdered = restoredItemsList.reduce((sum, item) => sum + item.orderedQuantity, 0);
+            
+            let newStatus = 'Partially Served';
+            if (totalBalance === totalOrdered) {
+              newStatus = 'Sent';
+            } else if (totalBalance === 0) {
+              newStatus = 'Fully Served';
+            }
+
+            const updatedInvoiceIds = (p.invoiceIds || []).filter(id => id !== invoiceId);
+
+            return {
+              ...p,
+              itemsList: restoredItemsList,
+              balanceQuantity: totalBalance,
+              status: newStatus,
+              invoiceIds: updatedInvoiceIds
+            };
+          }
+          return p;
+        })
+      );
+    }
+
+    // 3. Remove invoice from state
+    setInvoices((prev) => prev.filter((i) => i.id !== invoiceId));
+
+    // 4. Delete from Supabase
+    if (hasSupabase) {
+      try {
+        await supabase.from('invoices').delete().eq('id', invoiceId);
+      } catch (e) {
+        console.error("Failed to delete invoice from Supabase:", e);
+      }
+    }
+  };
+
 
   // PO Actions
   const updatePO = (poId, fields) => {
@@ -2534,6 +2660,8 @@ export const PortalProvider = ({ children }) => {
         deleteProduct,
         createBatch,
         deleteBatch,
+        deletePO,
+        deleteInvoice,
         createSinglePO,
         updatePO,
         dispatchPO,

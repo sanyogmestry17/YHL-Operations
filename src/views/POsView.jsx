@@ -24,6 +24,7 @@ export default function POsView() {
     dispatchPO, 
     addInvoice, 
     closePO,
+    deletePO,
     getLocalDateStr,
     role, 
     generatePO, 
@@ -529,7 +530,7 @@ export default function POsView() {
                         {po.status}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ display: 'flex', gap: '0.35rem' }}>
                       <button 
                         className="glass-btn" 
                         style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
@@ -542,6 +543,20 @@ export default function POsView() {
                       >
                         Details
                       </button>
+                      {role === 'Super Admin' && (
+                        <button 
+                          className="glass-btn" 
+                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: 'var(--color-rose)' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Are you sure you want to delete PO "${po.poNumber}"? This will delete all associated invoices and reverse stock changes in inventory. This cannot be undone.`)) {
+                              deletePO(po.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -841,6 +856,22 @@ export default function POsView() {
                           </div>
                         )}
                       </>
+                    )}
+                    {role === 'Super Admin' && (
+                      <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                        <button 
+                          className="glass-btn-danger" 
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete PO "${selectedPO.poNumber}"? This will delete all associated invoices and reverse stock changes in inventory. This cannot be undone.`)) {
+                              deletePO(selectedPO.id);
+                              setSelectedPOId(null);
+                            }
+                          }}
+                          style={{ width: '100%', justifyContent: 'center' }}
+                        >
+                          Delete Purchase Order (Permanently)
+                        </button>
+                      </div>
                     )}
                   </div>
 
