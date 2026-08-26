@@ -85,6 +85,74 @@ export default function ConfigurationView() {
     alert('EasyEcom integration configuration saved successfully!');
   };
 
+  // EasyEcom JWT Fetcher Helper State
+  const [helperEmail, setHelperEmail] = useState('');
+  const [helperPassword, setHelperPassword] = useState('');
+  const [helperLocationKey, setHelperLocationKey] = useState('');
+  const [isFetchingToken, setIsFetchingToken] = useState(false);
+  const [showHelperPanel, setShowHelperPanel] = useState(false);
+
+  const handleFetchJWTToken = async (e) => {
+    e.preventDefault();
+    if (!easyEcomXApiKey) {
+      alert("Please fill in your EasyEcom X-API-KEY first before generating a JWT Token.");
+      return;
+    }
+    if (!helperEmail || !helperPassword || !helperLocationKey) {
+      alert("Please enter your EasyEcom login email, password, and location key.");
+      return;
+    }
+
+    setIsFetchingToken(true);
+    try {
+      const targetUrl = 'https://api.easyecom.io/access/token';
+      const requestUrl = easyEcomProxyUrl 
+        ? `${easyEcomProxyUrl.endsWith('/') ? easyEcomProxyUrl : easyEcomProxyUrl + '/'}${targetUrl}`
+        : targetUrl;
+
+      const response = await fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          'x-api-key': easyEcomXApiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: helperEmail,
+          password: helperPassword,
+          location_key: helperLocationKey
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Authentication error: ${response.status} - ${errText || response.statusText}`);
+      }
+
+      const resJson = await response.json();
+      
+      if (resJson.message && !resJson.data) {
+        throw new Error(resJson.message);
+      }
+      
+      const tokenObj = resJson.data?.token || {};
+      const jwtTokenValue = tokenObj.jwt_token || tokenObj.token || '';
+      
+      if (!jwtTokenValue) {
+        throw new Error("No token returned in EasyEcom response. Check credentials.");
+      }
+
+      setEasyEcomJwtToken(jwtTokenValue);
+      alert("JWT Token fetched and loaded successfully!");
+      setShowHelperPanel(false);
+      setHelperPassword('');
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to fetch JWT token: ${err.message || "Unknown error"}`);
+    } finally {
+      setIsFetchingToken(false);
+    }
+  };
+
   // Company Config local state
   const [compInvoiceName, setCompInvoiceName] = useState(companyConfig?.invoiceToName || '');
   const [compInvoiceAddress, setCompInvoiceAddress] = useState(companyConfig?.invoiceToAddress || '');
@@ -891,6 +959,74 @@ export default function ConfigurationView() {
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>
                   Refer to the Authorization section in EasyEcom API docs to generate. Type 'sandbox' for test mode.
                 </span>
+              </div>
+
+              <div style={{ marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="glass-btn"
+                  style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--color-cyan)' }}
+                  onClick={() => setShowHelperPanel(!showHelperPanel)}
+                >
+                  {showHelperPanel ? 'Hide Token Generator Helper' : '🔑 Get JWT Token Automatically'}
+                </button>
+
+                {showHelperPanel && (
+                  <div className="glass-panel" style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.8rem', fontWeight: 600, margin: 0, color: 'var(--text-main)' }}>🔐 Generate Token Locally</h4>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0 }}>
+                      Enter your EasyEcom credentials below to retrieve the 90-day JWT token directly. Your password is processed purely in your browser and is never stored or sent to the chat.
+                    </p>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <div style={{ flex: '1', minWidth: '150px' }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Email ID</label>
+                        <input 
+                          type="email" 
+                          className="glass-input" 
+                          style={{ height: '30px', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                          placeholder="registered_email@domain.com"
+                          value={helperEmail}
+                          onChange={e => setHelperEmail(e.target.value)}
+                        />
+                      </div>
+                      <div style={{ flex: '1', minWidth: '150px' }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Password</label>
+                        <input 
+                          type="password" 
+                          className="glass-input" 
+                          style={{ height: '30px', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                          placeholder="••••••••"
+                          value={helperPassword}
+                          onChange={e => setHelperPassword(e.target.value)}
+                        />
+                      </div>
+                      <div style={{ flex: '1', minWidth: '150px' }}>
+                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>Location Key (Seller ID)</label>
+                        <input 
+                          type="text" 
+                          className="glass-input" 
+                          style={{ height: '30px', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                          placeholder="e.g. ht3485485444"
+                          value={helperLocationKey}
+                          onChange={e => setHelperLocationKey(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+                      <button 
+                        type="button" 
+                        className="glass-btn-primary" 
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                        disabled={isFetchingToken}
+                        onClick={handleFetchJWTToken}
+                      >
+                        {isFetchingToken ? 'Fetching Token...' : 'Generate & Load Token'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
