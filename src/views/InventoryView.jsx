@@ -13,7 +13,34 @@ import {
 } from 'lucide-react';
 
 export default function InventoryView() {
-  const { inventory, invoices, purchaseOrders, adjustStock, safetyThresholds } = usePortal();
+  const { 
+    inventory, 
+    invoices, 
+    purchaseOrders, 
+    adjustStock, 
+    safetyThresholds,
+    easyEcomConfig,
+    easyEcomLastSync,
+    syncInventoryFromEasyEcom
+  } = usePortal();
+
+  // Local Sync state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+
+  const handleEasyEcomSync = async () => {
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      await syncInventoryFromEasyEcom();
+    } catch (err) {
+      console.error(err);
+      setSyncError(err.message || "Failed to sync inventory.");
+      alert(`EasyEcom Sync failed: ${err.message || "Unknown error"}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
   
   // Local Adjustment Form State
   const [selectedItem, setSelectedItem] = useState('');
@@ -72,11 +99,43 @@ export default function InventoryView() {
 
   return (
     <>
-      <div className="page-header">
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .spin-icon {
+          animation: spin 1s linear infinite;
+        }
+      `}</style>
+
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title">Stock Inventory</h1>
           <p className="page-subtitle">Real-time balances of packaging materials and finished health goods</p>
         </div>
+        {easyEcomConfig?.isEnabled && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+            <button 
+              className="glass-btn-primary" 
+              onClick={handleEasyEcomSync}
+              disabled={isSyncing}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'var(--grad-success-real)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+            >
+              <RefreshCw size={14} className={isSyncing ? 'spin-icon' : ''} /> {isSyncing ? "Syncing..." : "Sync Finished Goods from EasyEcom"}
+            </button>
+            {easyEcomLastSync && (
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                Last Synced: {easyEcomLastSync}
+              </span>
+            )}
+            {syncError && (
+              <span style={{ fontSize: '0.7rem', color: 'var(--color-rose)' }}>
+                ⚠️ {syncError}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Grid: Left - Stock Lists, Right - Manual Adjustment Form */}

@@ -35,7 +35,9 @@ export default function ConfigurationView() {
     importDatabase,
     hasSupabase,
     safetyThresholds,
-    setSafetyThresholds
+    setSafetyThresholds,
+    easyEcomConfig,
+    setEasyEcomConfig
   } = usePortal();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,6 +57,32 @@ export default function ConfigurationView() {
     e.preventDefault();
     setSafetyThresholds(tempThresholds);
     alert('Inventory safety thresholds updated successfully!');
+  };
+
+  // EasyEcom Integration Form State
+  const [easyEcomEnabled, setEasyEcomEnabled] = useState(false);
+  const [easyEcomXApiKey, setEasyEcomXApiKey] = useState('');
+  const [easyEcomJwtToken, setEasyEcomJwtToken] = useState('');
+  const [easyEcomProxyUrl, setEasyEcomProxyUrl] = useState('');
+
+  React.useEffect(() => {
+    if (easyEcomConfig) {
+      setEasyEcomEnabled(easyEcomConfig.isEnabled || false);
+      setEasyEcomXApiKey(easyEcomConfig.xApiKey || '');
+      setEasyEcomJwtToken(easyEcomConfig.jwtToken || '');
+      setEasyEcomProxyUrl(easyEcomConfig.proxyUrl || 'https://cors-anywhere.herokuapp.com/');
+    }
+  }, [easyEcomConfig]);
+
+  const handleSaveEasyEcomConfig = (e) => {
+    e.preventDefault();
+    setEasyEcomConfig({
+      isEnabled: easyEcomEnabled,
+      xApiKey: easyEcomXApiKey,
+      jwtToken: easyEcomJwtToken,
+      proxyUrl: easyEcomProxyUrl
+    });
+    alert('EasyEcom integration configuration saved successfully!');
   };
 
   // Company Config local state
@@ -424,6 +452,19 @@ export default function ConfigurationView() {
         >
           Safety Thresholds
         </button>
+        <button 
+          className="glass-btn" 
+          style={{ 
+            background: activeTab === 'easyecom' ? 'var(--grad-primary)' : 'transparent', 
+            color: activeTab === 'easyecom' ? '#fff' : 'var(--text-muted)',
+            borderColor: activeTab === 'easyecom' ? 'var(--color-cyan)' : 'transparent',
+            fontWeight: 600,
+            fontSize: '0.85rem'
+          }}
+          onClick={() => setActiveTab('easyecom')}
+        >
+          EasyEcom Sync
+        </button>
       </div>
 
       {/* Product Catalog Tab */}
@@ -792,6 +833,99 @@ export default function ConfigurationView() {
             </div>
           </form>
         </div>
+      )}
+
+      {/* EasyEcom Sync Tab */}
+      {activeTab === 'easyecom' && (
+        <form onSubmit={handleSaveEasyEcomConfig} className="glass-panel" style={{ padding: '1.75rem', animation: 'scale-up 0.2s ease-out', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>EasyEcom API Integration</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                Synchronize finished goods inventory levels from your EasyEcom dashboard. Subpart items (jars/lids) are managed locally.
+              </p>
+            </div>
+            <button type="submit" className="glass-btn-primary">Save EasyEcom Settings</button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <input 
+                  type="checkbox" 
+                  id="easyEcomEnabled"
+                  checked={easyEcomEnabled} 
+                  onChange={e => setEasyEcomEnabled(e.target.checked)} 
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="easyEcomEnabled" style={{ fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                  Enable EasyEcom Inventory Sync
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label className="glass-label">EasyEcom X-API-KEY</label>
+                <input 
+                  type="password" 
+                  className="glass-input" 
+                  placeholder="Enter X-API-KEY from Account Settings" 
+                  value={easyEcomXApiKey} 
+                  onChange={e => setEasyEcomXApiKey(e.target.value)} 
+                  required={easyEcomEnabled}
+                />
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>
+                  Found under Account Settings &gt; Change credentials on EasyEcom. Type 'sandbox' for test mode.
+                </span>
+              </div>
+
+              <div className="form-group">
+                <label className="glass-label">EasyEcom JWT Token</label>
+                <textarea 
+                  className="glass-input" 
+                  rows={4}
+                  placeholder="Paste JWT Authorization Token..." 
+                  value={easyEcomJwtToken} 
+                  onChange={e => setEasyEcomJwtToken(e.target.value)} 
+                  required={easyEcomEnabled}
+                />
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-dark)' }}>
+                  Refer to the Authorization section in EasyEcom API docs to generate. Type 'sandbox' for test mode.
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1.75rem' }}>
+              <div className="form-group">
+                <label className="glass-label">CORS Proxy URL (For Browser Sync)</label>
+                <input 
+                  type="text" 
+                  className="glass-input" 
+                  placeholder="e.g. https://cors-anywhere.herokuapp.com/" 
+                  value={easyEcomProxyUrl} 
+                  onChange={e => setEasyEcomProxyUrl(e.target.value)} 
+                />
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-dark)', lineHeight: '1.2' }}>
+                  Since direct browser calls to `api.easyecom.io` are restricted by CORS policies, requests are routed through a CORS proxy. Use the default public proxy or enter your own micro-proxy URL.
+                </span>
+              </div>
+
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', background: 'rgba(0, 242, 254, 0.02)' }}>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-cyan)' }}>Current SKUs Configuration</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '150px', overflowY: 'auto' }}>
+                  {products.map(prod => (
+                    <div key={prod.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.2rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>{prod.name}</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{prod.sku || 'No SKU Set'}</strong>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-dark)', marginTop: '0.25rem' }}>
+                  Note: The app queries EasyEcom for these specific SKU codes. Make sure the SKUs match your EasyEcom finished product list exactly.
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
       )}
 
       {/* Product Creator/Editor Modal */}

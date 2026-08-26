@@ -1152,6 +1152,25 @@ export const PortalProvider = ({ children }) => {
     return DEFAULT_DESTINATIONS;
   });
 
+  const [easyEcomConfig, setEasyEcomConfig] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yhl_easyecom_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load EasyEcom config:", e);
+    }
+    return {
+      isEnabled: false,
+      xApiKey: '',
+      jwtToken: '',
+      proxyUrl: 'https://cors-anywhere.herokuapp.com/'
+    };
+  });
+
+  const [easyEcomLastSync, setEasyEcomLastSync] = useState(() => {
+    return localStorage.getItem('yhl_easyecom_last_sync') || null;
+  });
+
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem('yhl_notifications');
@@ -1246,6 +1265,18 @@ export const PortalProvider = ({ children }) => {
     localStorage.setItem('yhl_delivery_destinations', JSON.stringify(deliveryDestinations));
   }, [deliveryDestinations]);
 
+  useEffect(() => {
+    localStorage.setItem('yhl_easyecom_config', JSON.stringify(easyEcomConfig));
+  }, [easyEcomConfig]);
+
+  useEffect(() => {
+    if (easyEcomLastSync) {
+      localStorage.setItem('yhl_easyecom_last_sync', easyEcomLastSync);
+    } else {
+      localStorage.removeItem('yhl_easyecom_last_sync');
+    }
+  }, [easyEcomLastSync]);
+
   // --- Supabase DB Load & Synchronization ---
   const [isDbLoading, setIsDbLoading] = useState(hasSupabase);
 
@@ -1331,6 +1362,13 @@ export const PortalProvider = ({ children }) => {
             }
           } else {
             await supabase.from('config_settings').insert({ key: 'delivery_destinations', value: deliveryDestinations });
+          }
+
+          const easyEcomRow = configRows.find(r => r.key === 'easyecom_config');
+          if (easyEcomRow) {
+            setEasyEcomConfig(easyEcomRow.value);
+          } else {
+            await supabase.from('config_settings').insert({ key: 'easyecom_config', value: easyEcomConfig });
           }
         }
 
@@ -1490,6 +1528,12 @@ export const PortalProvider = ({ children }) => {
     supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: safetyThresholds })
       .then(({ error }) => { if (error) console.error("Supabase sync safety_thresholds failed. If RLS is enabled, please verify public read/write access policies are created. Details:", error); });
   }, [safetyThresholds, isDbLoading]);
+
+  useEffect(() => {
+    if (!hasSupabase || isDbLoading) return;
+    supabase.from('config_settings').upsert({ key: 'easyecom_config', value: easyEcomConfig })
+      .then(({ error }) => { if (error) console.error("Supabase sync easyecom_config failed. Details:", error); });
+  }, [easyEcomConfig, isDbLoading]);
 
   useEffect(() => {
     if (!hasSupabase || isDbLoading) return;
@@ -2410,6 +2454,98 @@ export const PortalProvider = ({ children }) => {
     }));
   };
 
+  // Sync inventory from EasyEcom
+  const syncInventoryFromEasyEcom = async () => {
+    if (!easyEcomConfig.isEnabled || !easyEcomConfig.xApiKey || !easyEcomConfig.jwtToken) {
+      throw new Error("EasyEcom integration is not fully configured or enabled.");
+    }
+
+    if (easyEcomConfig.xApiKey === 'sandbox' || easyEcomConfig.jwtToken === 'sandbox' || easyEcomConfig.xApiKey === 'test' || easyEcomConfig.jwtToken === 'test') {
+      // Simulate EasyEcom response for testing
+      setInventory(prev => {
+        const updated = { ...prev };
+        products.forEach(prod => {
+          updated[prod.name] = Math.floor(100 + Math.random() * 400);
+        });
+        return updated;
+      });
+
+      const timestamp = new Date().toLocaleString('en-IN', { 
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
+      }) + " (Sandbox Mode)";
+      setEasyEcomLastSync(timestamp);
+      return true;
+    }
+
+    const targetUrl = 'https://api.easyecom.io/v2/inventory/details';
+    const requestUrl = easyEcomConfig.proxyUrl 
+      ? `${easyEcomConfig.proxyUrl.endsWith('/') ? easyEcomConfig.proxyUrl : easyEcomConfig.proxyUrl + '/'}${targetUrl}`
+      : targetUrl;
+
+    const response = await fetch(requestUrl, {
+      method: 'GET',
+      headers: {
+        'x-api-key': easyEcomConfig.xApiKey,
+        'Authorization': `Bearer ${easyEcomConfig.jwtToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`EasyEcom API error: ${response.status} - ${errText || response.statusText}`);
+    }
+
+    const resJson = await response.json();
+    const data = resJson.data || resJson.inventory || (Array.isArray(resJson) ? resJson : []);
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid response format from EasyEcom (expected an array under 'data').");
+    }
+
+    const skuStockMap = {};
+    data.forEach(item => {
+      if (item && typeof item === 'object') {
+        const skuCode = (item.sku || item.sku_code || item.item_code || '').trim().toUpperCase();
+        const qty = Number(
+          item.available_stock !== undefined ? item.available_stock : 
+          (item.quantity !== undefined ? item.quantity : 
+          (item.available_quantity !== undefined ? item.available_quantity : 
+          (item.qty !== undefined ? item.qty : 0)))
+        );
+        if (skuCode) {
+          skuStockMap[skuCode] = qty;
+        }
+      }
+    });
+
+    setInventory(prev => {
+      const updated = { ...prev };
+      products.forEach(prod => {
+        if (prod.sku) {
+          const finishedGoodsSku = prod.sku.trim().toUpperCase();
+          if (skuStockMap[finishedGoodsSku] !== undefined) {
+            updated[prod.name] = skuStockMap[finishedGoodsSku];
+          }
+        }
+      });
+      return updated;
+    });
+
+    const timestamp = new Date().toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: true 
+    });
+    setEasyEcomLastSync(timestamp);
+    return true;
+  };
+
   // Dynamically compute real-time alerts and warnings
   const warnings = useMemo(() => {
     const list = [];
@@ -2564,6 +2700,14 @@ export const PortalProvider = ({ children }) => {
     setVendorsConfig(DEFAULT_VENDORS_CONFIG);
     setSafetyThresholds(DEFAULT_THRESHOLDS);
     setDeliveryDestinations(DEFAULT_DESTINATIONS);
+    const defaultEasyEcom = {
+      isEnabled: false,
+      xApiKey: '',
+      jwtToken: '',
+      proxyUrl: 'https://cors-anywhere.herokuapp.com/'
+    };
+    setEasyEcomConfig(defaultEasyEcom);
+    setEasyEcomLastSync(null);
     
     const clearedInventory = {};
     Object.keys(DEFAULT_INVENTORY).forEach((key) => {
@@ -2576,6 +2720,8 @@ export const PortalProvider = ({ children }) => {
     localStorage.setItem('yhl_vendors_config', JSON.stringify(DEFAULT_VENDORS_CONFIG));
     localStorage.setItem('yhl_safety_thresholds', JSON.stringify(DEFAULT_THRESHOLDS));
     localStorage.setItem('yhl_delivery_destinations', JSON.stringify(DEFAULT_DESTINATIONS));
+    localStorage.setItem('yhl_easyecom_config', JSON.stringify(defaultEasyEcom));
+    localStorage.removeItem('yhl_easyecom_last_sync');
     localStorage.setItem('yhl_inventory', JSON.stringify(clearedInventory));
 
     if (hasSupabase) {
@@ -2591,6 +2737,7 @@ export const PortalProvider = ({ children }) => {
         await supabase.from('config_settings').upsert({ key: 'vendors_config', value: DEFAULT_VENDORS_CONFIG });
         await supabase.from('config_settings').upsert({ key: 'safety_thresholds', value: DEFAULT_THRESHOLDS });
         await supabase.from('config_settings').upsert({ key: 'delivery_destinations', value: DEFAULT_DESTINATIONS });
+        await supabase.from('config_settings').upsert({ key: 'easyecom_config', value: defaultEasyEcom });
         
         const rows = Object.keys(clearedInventory).map(item_name => ({
           item_name,
@@ -2688,7 +2835,12 @@ export const PortalProvider = ({ children }) => {
         safetyThresholds,
         setSafetyThresholds,
         deliveryDestinations,
-        addDeliveryDestination
+        addDeliveryDestination,
+        easyEcomConfig,
+        setEasyEcomConfig,
+        easyEcomLastSync,
+        setEasyEcomLastSync,
+        syncInventoryFromEasyEcom
       }}
     >
       {children}
